@@ -1,0 +1,28 @@
+{
+	"VBAProject Name": "TableBuilder",
+	"Base Path": "C:\\Users\\DickDye\\Documents\\Excel\\TableManager\\src",
+	"Module Paths": {
+		"iTable": "iTable.cls",
+		"Table": "Table.bas",
+		"TableDetails_Table": "TableDetails_Table.cls",
+		"TableBasics_Table": "TableBasics_Table.cls",
+		"Error_WarningRoutines": "Error_WarningRoutines.bas",
+		"ErrorFileClass": "ErrorFileClass.cls",
+		"MessageFileClass": "MessageFileClass.cls",
+		"CommonRoutines": "CommonRoutines.bas",
+		"TableBasics": "TableBasics.bas",
+		"Driver": "Driver.bas",
+		"ClassBuilder": "ClassBuilder.bas",
+		"ModuleBuilder": "ModuleBuilder.bas",
+		"TableDetails": "TableDetails.bas"
+	},
+	"References": [
+		{
+			"Name": "Scripting",
+			"Description": "Microsoft Scripting Runtime",
+			"GUID": "{420B2830-E718-11CF-893D-00A0C9054228}",
+			"Major": 1,
+			"Minor": 0
+		}
+	]
+}
