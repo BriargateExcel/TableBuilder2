@@ -6,30 +6,17 @@ Private Const Module_Name As String = "ClassBuilder."
 Private Const Quote As String = """"
 
 Public Sub ClassBuilder( _
-    ByVal DetailsTable As ListObject, _
-    ByVal BasicsTable As ListObject)
+    ByVal DetailsDict As Dictionary, _
+    ByVal TableName As String, _
+    ByVal ClassName As String)
 
     ' This routine builds the class module
 
     Const RoutineName As String = Module_Name & "ClassBuilder"
     On Error GoTo ErrorHandler
     
-    Dim DetailsDict As Dictionary
-    If TableDetails.TryCopyTableToDictionary(DetailsTable, DetailsDict) Then
-        ' Success; do nothing
-    Else
-        ReportError "Error copying Table to dictionary", "Routine", RoutineName
-    End If
-    
-    Dim BasicDict As Dictionary
-    If TableBasics.TryCopyTableToDictionary(BasicsTable, BasicDict) Then
-        ' Success; do nothing
-    Else
-        ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
-    End If
-    
     Dim StreamName As String
-    StreamName = BasicDict.Items(0).ClassName & ".cls"
+    StreamName = ClassName & ".cls"
     
     Dim StreamFile As MessageFileClass
     Set StreamFile = New MessageFileClass
@@ -41,7 +28,7 @@ Public Sub ClassBuilder( _
         "BEGIN" & vbCrLf & _
         "  MultiUse = -1  'True" & vbCrLf & _
         "End" & vbCrLf & _
-        "Attribute VB_Name = " & Quote & BasicDict.Items(0).ClassName & Quote & vbCrLf & _
+        "Attribute VB_Name = " & Quote & ClassName & Quote & vbCrLf & _
         "Attribute VB_GlobalNameSpace = False" & vbCrLf & _
         "Attribute VB_Creatable = False" & vbCrLf & _
         "Attribute VB_PredeclaredId = False" & vbCrLf & _
@@ -69,31 +56,31 @@ Public Sub ClassBuilder( _
     
     Line = _
         "Public Property Get iTable_Headers() As Variant" & vbCrLf & _
-        "    iTable_Headers = " & BasicDict.Items(0).TableName & ".Headers" & vbCrLf & _
+        "    iTable_Headers = " & TableName & ".Headers" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
         "Public Property Get iTable_LocalDictionary() As Dictionary" & vbCrLf & _
-        "    Set iTable_LocalDictionary = " & BasicDict.Items(0).TableName & "Dictionary" & vbCrLf & _
+        "    Set iTable_LocalDictionary = " & TableName & "Dictionary" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
         "Public Property Get iTable_HeaderWidth() As Long" & vbCrLf & _
-        "    iTable_HeaderWidth = " & BasicDict.Items(0).TableName & "HeaderWidth" & vbCrLf & _
+        "    iTable_HeaderWidth = " & TableName & "HeaderWidth" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
         "Public Property Get iTable_Initialized() As Boolean" & vbCrLf & _
-        "    iTable_Initialized = " & BasicDict.Items(0).TableName & "Initialized" & vbCrLf & _
+        "    iTable_Initialized = " & TableName & "Initialized" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
         "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
-        "    Set iTable_LocalTable = " & BasicDict.Items(0).TableName & "Table" & vbCrLf & _
+        "    Set iTable_LocalTable = " & TableName & "Table" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
@@ -105,13 +92,13 @@ Public Sub ClassBuilder( _
     
     Line = _
         "Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean" & vbCrLf & _
-        "    iTable_TryCopyArrayToDictionary = " & BasicDict.Items(0).TableName & ".TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
+        "    iTable_TryCopyArrayToDictionary = " & TableName & ".TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
         "End Function" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
         "Public Sub iTable_CopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant)" & vbCrLf & _
-        "    " & BasicDict.Items(0).TableName & ".CopyDictionaryToArray Dict, Ary" & vbCrLf & _
+        "    " & TableName & ".CopyDictionaryToArray Dict, Ary" & vbCrLf & _
         "End Sub" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
@@ -124,7 +111,7 @@ Public Sub ClassBuilder( _
     StreamFile.WriteMessageLine Line, StreamName
     
     Line = _
-        "    TryCopyDictionaryToTable = " & BasicDict.Items(0).TableName & ".TryCopyDictionaryToTable(Dict, Table, TableCorner, TableName)" & vbCrLf & _
+        "    TryCopyDictionaryToTable = " & TableName & ".TryCopyDictionaryToTable(Dict, Table, TableCorner, TableName)" & vbCrLf & _
         "End Function" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
@@ -162,8 +149,6 @@ Private Sub BuildProperties( _
         "Public Property Let " & Record.VariableName & "(ByVal Param as " & Record.VariableType & ")" & vbCrLf & _
         "    p" & Record.VariableName & " = Param" & vbCrLf & _
         "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
     StreamFile.WriteMessageLine Line, StreamName
     
 Done:

@@ -1,8 +1,7 @@
 Attribute VB_Name = "TableDetails"
-'Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 12/30/2019 7:27:22 AM
+' Built on 12/30/2019 12:26:59 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -99,6 +98,7 @@ Public Sub Initialize()
 
     Dim TableDetails As TableDetails_Table
     Set TableDetails = New TableDetails_Table
+
     Set pTableDetailsDict = New Dictionary
     If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, pTableDetailsDict) Then
         ' Success; do nothing
@@ -170,24 +170,29 @@ Public Function TryCopyArrayToDictionary( _
     Dim Key As String
     Dim Record As TableDetails_Table
 
-    For I = 1 To UBound(Ary, 1)
-        Key = Ary(I, pColumnHeaderColumn)
+    If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
+        For I = 1 To UBound(Ary, 1)
+            Key = Ary(I, pColumnHeaderColumn)
 
-        If Dict.Exists(Key) Then
-            MsgBox "Duplicate key"
-            TryCopyArrayToDictionary = False
-            GoTo Done
-        Else
-            Set Record = New TableDetails_Table
+            If Dict.Exists(Key) Then
+                MsgBox "Duplicate key"
+                TryCopyArrayToDictionary = False
+                GoTo Done
+            Else
+                Set Record = New TableDetails_Table
 
-            Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
-            Record.VariableName = Ary(I, pVariableNameColumn)
-            Record.Formatted = IIf(Ary(I, pFormattedColumn) = "Yes", True, False)
-            Record.VariableType = Ary(I, pVariableTypeColumn)
+                Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
+                Record.VariableName = Ary(I, pVariableNameColumn)
+                Record.Formatted = IIf(Ary(I, pFormattedColumn) = "Yes", True, False)
+                Record.VariableType = Ary(I, pVariableTypeColumn)
 
-            Dict.Add Key, Record
-        End If
-    Next I
+                Dict.Add Key, Record
+            End If
+        Next I
+
+    Else
+        Dict.Add Ary, Ary
+    End If
 
     '    Array formatting goes here
 
@@ -240,6 +245,4 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TryCopyDictionaryToTable
-
-
 

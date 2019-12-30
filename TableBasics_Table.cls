@@ -10,21 +10,11 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 12/24/2019 10:55:28 AM
+' Built on 12/30/2019 12:25:32 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-Private pSheetName As String
 Private pTableName As String
-Private pClassName As String
-
-Public Property Get SheetName() As String
-    SheetName = pSheetName
-End Property
-
-Public Property Let SheetName(ByVal Param As String)
-    pSheetName = Param
-End Property
 
 Public Property Get TableName() As String
     TableName = pTableName
@@ -32,14 +22,6 @@ End Property
 
 Public Property Let TableName(ByVal Param As String)
     pTableName = Param
-End Property
-
-Public Property Get ClassName() As String
-    ClassName = pClassName
-End Property
-
-Public Property Let ClassName(ByVal Param As String)
-    pClassName = Param
 End Property
 
 Public Property Get iTable_Headers() As Variant
@@ -82,5 +64,4 @@ Public Function TryCopyDictionaryToTable( _
 
     TryCopyDictionaryToTable = TableBasics.TryCopyDictionaryToTable(Dict, Table, TableCorner, TableName)
 End Function
-
 

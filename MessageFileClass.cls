@@ -62,12 +62,14 @@ Private pStreamName As String
 Public Sub WriteMessageLine( _
        ByVal Message As String, _
        ByVal StreamName As String, _
-       Optional ByVal FolderName As String)
+       Optional ByVal FolderName As String = vbNullString)
 
     ' This routine writes one line to pErrorStream
     
     Const RoutineName As String = Module_Name & "WriteMessageLine"
     On Error GoTo ErrorHandler
+    
+    FolderName = IIf(FolderName = vbNullString, StreamName, FolderName)
     
     If pMessageStream Is Nothing Then
         CreateMessageStream StreamName, FolderName

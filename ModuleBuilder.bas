@@ -6,30 +6,17 @@ Private Const Module_Name As String = "ModuleBuilder."
 Private Const Quote As String = """"
 
 Public Sub ModuleBuilder( _
-    ByVal DetailsTable As ListObject, _
-    ByVal BasicsTable As ListObject)
+    ByVal DetailsDict As Dictionary, _
+    ByVal TableName As String, _
+    ByVal ClassName As String)
 
     ' This routine builds the basic module
 
     Const RoutineName As String = Module_Name & "ClassBuilder"
     On Error GoTo ErrorHandler
     
-    Dim DetailsDict As Dictionary
-    If TableDetails.TryCopyTableToDictionary(DetailsTable, DetailsDict) Then
-        ' Success; do nothing
-    Else
-        ReportError "Error copying Table to dictionary", "Routine", RoutineName
-    End If
-    
-    Dim BasicDict As Dictionary
-    If TableBasics.TryCopyTableToDictionary(BasicsTable, BasicDict) Then
-        ' Success; do nothing
-    Else
-        ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
-    End If
-    
     Dim StreamName As String
-    StreamName = BasicDict.Items(0).TableName & ".bas"
+    StreamName = TableName & ".bas"
     
     Dim StreamFile As MessageFileClass
     Set StreamFile = New MessageFileClass
@@ -37,34 +24,34 @@ Public Sub ModuleBuilder( _
     Dim Line As String
     
     Line = _
-        "Attribute VB_Name = " & Quote & BasicDict.Items(0).TableName & Quote & vbCrLf & _
+        "Attribute VB_Name = " & Quote & TableName & Quote & vbCrLf & _
         "Option Explicit" & vbCrLf & _
         vbCrLf & _
         "' Built on " & Now() & vbCrLf & _
         "' Built By Briargate Excel Table Builder" & vbCrLf & _
         "' See BriargateExcel.com for details" & vbCrLf & _
         vbCrLf & _
-        "Private Const Module_Name As String = " & Quote & BasicDict.Items(0).TableName & "." & Quote & vbCrLf & vbCrLf & _
+        "Private Const Module_Name As String = " & Quote & TableName & "." & Quote & vbCrLf & vbCrLf & _
         "Private pInitialized As Boolean"
     StreamFile.WriteMessageLine Line, StreamName, "Basic Modules"
 
     Line = _
-        "Private p" & BasicDict.Items(0).TableName & "Dict As Dictionary" & vbCrLf
+        "Private p" & TableName & "Dict As Dictionary" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
     BuildConstants StreamFile, StreamName, DetailsDict
 
     Line = _
-        "Public Property Get " & BasicDict.Items(0).TableName & "Table() As ListObject" & vbCrLf & _
-        "    Set " & BasicDict.Items(0).TableName & "Table = " & BasicDict.Items(0).TableName & "Sheet.ListObjects(" _
-        & Quote & BasicDict.Items(0).TableName & "Table" & Quote & ")" & vbCrLf & _
+        "Public Property Get " & TableName & "Table() As ListObject" & vbCrLf & _
+        "    Set " & TableName & "Table = " & TableName & "Sheet.ListObjects(" _
+        & Quote & TableName & "Table" & Quote & ")" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
     Line = _
-        "Public Sub Reset" & BasicDict.Items(0).TableName & "()" & vbCrLf & _
+        "Public Sub Reset" & TableName & "()" & vbCrLf & _
         "    pInitialized = False" & vbCrLf & _
-        "    Set p" & BasicDict.Items(0).TableName & "Dict = Nothing" & vbCrLf & _
+        "    Set p" & TableName & "Dict = Nothing" & vbCrLf & _
         "End Sub" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
@@ -85,7 +72,7 @@ Public Sub ModuleBuilder( _
         "    Dim Ary As Variant" & vbCrLf & _
         "    Ary = Tbl.DataBodyRange" & vbCrLf & _
         "    If Err.Number <> 0 Then" & vbCrLf & _
-        "        MsgBox " & Quote & "The " & BasicDict.Items(0).TableName & " table is empty" & Quote & vbCrLf & _
+        "        MsgBox " & Quote & "The " & TableName & " table is empty" & Quote & vbCrLf & _
         "        TryCopyTableToDictionary = False" & vbCrLf & _
         "        GoTo Done" & vbCrLf & _
         "    End If" & vbCrLf & _
@@ -98,12 +85,12 @@ Public Sub ModuleBuilder( _
         "    If Dict Is Nothing Then" & vbCrLf & _
         "        Set ThisDict = New Dictionary" & vbCrLf & _
         "    Else" & vbCrLf & _
-        "        Set ThisDict = pTableDetailsDict" & vbCrLf & _
+        "        Set ThisDict = p" & TableName & "Dict" & vbCrLf & _
         "    End If" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
     Line = _
-        "    If " & BasicDict.Items(0).TableName & ".TryCopyArrayToDictionary(Ary, ThisDict) Then" & vbCrLf & _
+        "    If " & TableName & ".TryCopyArrayToDictionary(Ary, ThisDict) Then" & vbCrLf & _
         "        ' Success; do nothing" & vbCrLf & _
         "    Else" & vbCrLf & _
         "        ReportError " & Quote & "Error copying array to dictionary" & Quote & ", " & Quote & "Routine" & Quote & ", RoutineName" & vbCrLf & _
@@ -129,20 +116,20 @@ Public Sub ModuleBuilder( _
     BuildHeaders StreamFile, StreamName, DetailsDict
 
     Line = _
-        "Public Property Get TableDetailsDictionary() As Dictionary" & vbCrLf & _
-        "   Set TableDetailsDictionary = pTableDetailsDict" & vbCrLf & _
+        "Public Property Get " & TableName & "Dictionary() As Dictionary" & vbCrLf & _
+        "   Set " & TableName & "Dictionary = p" & TableName & "Dict" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
     Line = _
-        "Public Property Get TableDetailsHeaderWidth() As Long" & vbCrLf & _
-        "    TableDetailsHeaderWidth = pHeaderWidth" & vbCrLf & _
+        "Public Property Get " & TableName & "HeaderWidth() As Long" & vbCrLf & _
+        "    " & TableName & "HeaderWidth = pHeaderWidth" & vbCrLf & _
         "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
     Line = _
-            "Public Property Get TableDetailsInitialized() As Boolean" & vbCrLf & _
-            "    TableDetailsInitialized = pInitialized" & vbCrLf & _
+            "Public Property Get " & TableName & "Initialized() As Boolean" & vbCrLf & _
+            "    " & TableName & "Initialized = pInitialized" & vbCrLf & _
             "End Property" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
@@ -158,10 +145,10 @@ Public Sub ModuleBuilder( _
     StreamFile.WriteMessageLine Line, StreamName
 
     Line = _
-        "    Dim TableDetails As TableDetails_Table" & vbCrLf & _
-        "    Set TableDetails = New TableDetails_Table" & vbCrLf & _
-        "    Set pTableDetailsDict = New Dictionary" & vbCrLf & _
-        "    If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, pTableDetailsDict) Then" & vbCrLf & _
+        "    Dim  " & TableName & " As " & ClassName & vbCrLf & _
+        "    Set " & TableName & " = New " & ClassName & vbCrLf & vbCrLf & _
+        "    Set p" & TableName & "Dict = New Dictionary" & vbCrLf & _
+        "    If Table.TryCopyTableToDictionary(" & TableName & ", " & TableName & "Table, p" & TableName & "Dict) Then" & vbCrLf & _
         "        ' Success; do nothing" & vbCrLf & _
         "    Else" & vbCrLf & _
         "        MsgBox " & Quote & "Error copying TableDetails table" & Quote & vbCrLf & _
@@ -196,7 +183,7 @@ Public Sub ModuleBuilder( _
     "    I = 1" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
-    RecordToArray StreamFile, StreamName, DetailsDict, BasicDict
+    RecordToArray StreamFile, StreamName, DetailsDict, ClassName
 
     Line = _
         "Done:" & vbCrLf & _
@@ -227,7 +214,7 @@ Public Sub ModuleBuilder( _
         "    Set Dict = New Dictionary" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
-    ArrayToRecord StreamFile, StreamName, DetailsDict, BasicDict
+    ArrayToRecord StreamFile, StreamName, DetailsDict, ClassName
 
     Line = _
         "Done:" & vbCrLf & _
@@ -261,8 +248,8 @@ Public Sub ModuleBuilder( _
         vbCrLf & _
         "    If Not pInitialized Then TableDetails.Initialize" & vbCrLf & _
         vbCrLf & _
-        "    Dim ClassName As " & BasicDict.Items(0).ClassName & vbCrLf & _
-        "    Set ClassName = New " & BasicDict.Items(0).ClassName & vbCrLf
+        "    Dim ClassName As " & ClassName & vbCrLf & _
+        "    Set ClassName = New " & ClassName & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     Line = _
         "    '    FormatColumnAsText pFirstColumn, Table, TableCorner" & vbCrLf & _
@@ -270,7 +257,7 @@ Public Sub ModuleBuilder( _
         "    If Table.TryCopyDictionaryToTable(ClassName, Dict, Table, TableCorner, TableName) Then" & vbCrLf & _
         "        ' Success; do " & vbCrLf & _
         "    Else" & vbCrLf & _
-        "        MsgBox " & Quote & "Error copying " & BasicDict.Items(0).TableName & " dictionary to table" & Quote & vbCrLf & _
+        "        MsgBox " & Quote & "Error copying " & TableName & " dictionary to table" & Quote & vbCrLf & _
         "    End If" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
 
@@ -336,7 +323,7 @@ Private Sub RecordToArray( _
         ByVal StreamFile As MessageFileClass, _
         ByVal StreamName As String, _
         ByVal DetailsDict As Dictionary, _
-        ByVal BasicDict As Dictionary)
+        ByVal ClassName As String)
 
     ' This routine builds an array from details
     
@@ -345,7 +332,7 @@ Private Sub RecordToArray( _
     
     Dim Line As String
     
-    Line = "    Dim Record As " & BasicDict.Items(0).ClassName & vbCrLf & _
+    Line = "    Dim Record As " & ClassName & vbCrLf & _
         "    Dim Entry As Variant" & vbCrLf & _
         "    For Each Entry In DetailsDict.Keys" & vbCrLf & _
         "        Set Record = DetailsDict.Item(Entry)" & vbCrLf
@@ -418,7 +405,7 @@ Private Sub ArrayToRecord( _
         ByVal StreamFile As MessageFileClass, _
         ByVal StreamName As String, _
         ByVal DetailsDict As Dictionary, _
-        ByVal BasicDict As Dictionary)
+        ByVal ClassName As String)
 
     ' This routine builds a dictionary from an array
     
@@ -428,29 +415,24 @@ Private Sub ArrayToRecord( _
     Dim Line As String
     Line = _
         "    Dim Key As String" & vbCrLf & _
-        "    Dim Record as " & BasicDict.Items(0).ClassName & vbCrLf & vbCrLf & _
-        "    For I = 1 To UBound(Ary, 1)" & vbCrLf & _
-        "        Key = Ary(I, p" & DetailsDict.Items(0).VariableName & "Column)" & vbCrLf & vbCrLf & _
-        "        If Dict.Exists(Key) Then" & vbCrLf & _
-        "            MsgBox " & Quote & "Duplicate key" & Quote & vbCrLf & _
-        "            TryCopyArrayToDictionary = False" & vbCrLf & _
-        "            GoTo Done" & vbCrLf & _
-        "        Else" & vbCrLf & _
-        "            Set Record = New " & BasicDict.Items(0).ClassName & vbCrLf
+        "    Dim Record as " & ClassName & vbCrLf & vbCrLf & _
+        "    If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then" & vbCrLf & _
+        "        For I = 1 To UBound(Ary, 1)" & vbCrLf & _
+        "            Key = Ary(I, p" & DetailsDict.Items(0).VariableName & "Column)" & vbCrLf & vbCrLf & _
+        "            If Dict.Exists(Key) Then" & vbCrLf & _
+        "                MsgBox " & Quote & "Duplicate key" & Quote & vbCrLf & _
+        "                TryCopyArrayToDictionary = False" & vbCrLf & _
+        "                GoTo Done" & vbCrLf & _
+        "            Else" & vbCrLf & _
+        "                Set Record = New " & ClassName & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     
     Dim Entry As Variant
     For Each Entry In DetailsDict.Keys
         If DetailsDict.Item(Entry).VariableType = "Boolean" Then
-        
-'        Record.Formatted = IIf(Ary(I, pFormattedColumn) = "Yes", True, False)
-        
-            Line = "            Record." & DetailsDict.Item(Entry).VariableName & " = IIf(Ary(I, p" & DetailsDict.Item(Entry).VariableName & "Column) = " & Quote & "Yes" & Quote & ", True,False)"
-        
-        
-        
+            Line = "                Record." & DetailsDict.Item(Entry).VariableName & " = IIf(Ary(I, p" & DetailsDict.Item(Entry).VariableName & "Column) = " & Quote & "Yes" & Quote & ", True,False)"
         Else
-            Line = "            Record." & DetailsDict.Item(Entry).VariableName & " = Ary(I, p" & DetailsDict.Item(Entry).VariableName & "Column)"
+            Line = "                Record." & DetailsDict.Item(Entry).VariableName & " = Ary(I, p" & DetailsDict.Item(Entry).VariableName & "Column)"
         End If
         StreamFile.WriteMessageLine Line, StreamName
     Next Entry
@@ -458,9 +440,12 @@ Private Sub ArrayToRecord( _
     StreamFile.WriteBlankMessageLines StreamName
     
     Line = _
-        "            Dict.Add Key, Record" & vbCrLf & _
-        "        End If" & vbCrLf & _
-        "    Next I" & vbCrLf & vbCrLf & _
+        "                Dict.Add Key, Record" & vbCrLf & _
+        "            End If" & vbCrLf & _
+        "        Next I" & vbCrLf & vbCrLf & _
+        "    Else" & vbCrLf & _
+        "        Dict.Add Ary, Ary" & vbCrLf & _
+        "    End If" & vbCrLf & vbCrLf & _
         "    '    Array formatting goes here" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
     

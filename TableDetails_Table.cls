@@ -10,10 +10,9 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 12/30/2019 7:59:21 AM
+' Built on 12/30/2019 12:25:33 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
-
 
 Private pColumnHeader As String
 Private pVariableName As String
@@ -64,38 +63,31 @@ Public Property Get iTable_HeaderWidth() As Long
     iTable_HeaderWidth = TableDetailsHeaderWidth
 End Property
 
-
 Public Property Get iTable_Initialized() As Boolean
     iTable_Initialized = TableDetailsInitialized
 End Property
-
 
 Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableDetailsTable
 End Property
 
-
 Public Sub iTable_Initialize()
     TableDetails.Initialize
 End Sub
-
 
 Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
     iTable_TryCopyArrayToDictionary = TableDetails.TryCopyArrayToDictionary(Ary, Dict)
 End Function
 
-
 Public Sub iTable_CopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant)
     TableDetails.CopyDictionaryToArray Dict, Ary
 End Sub
-
 
 Public Function TryCopyDictionaryToTable( _
        Optional ByVal Dict As Dictionary = Nothing, _
        Optional ByVal Table As ListObject = Nothing, _
        Optional TableCorner As Range = Nothing, _
        Optional TableName As String)
-
 
     TryCopyDictionaryToTable = TableDetails.TryCopyDictionaryToTable(Dict, Table, TableCorner, TableName)
 End Function
