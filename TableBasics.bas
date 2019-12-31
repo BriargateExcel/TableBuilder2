@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 12/30/2019 12:26:58 PM
+' Built on 12/31/2019 12:09:32 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -17,25 +17,29 @@ Public Property Get TableBasicsTable() As ListObject
     Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
 End Property
 
-Public Sub ResetTableBasics()
+Public Property Get TableBasicsDictionary() As Dictionary
+   Set TableBasicsDictionary = pTableBasicsDict
+End Property
+
+Public Sub TableBasicsReset()
     pInitialized = False
     Set pTableBasicsDict = Nothing
 End Sub
 
-Public Function TryCopyTableToDictionary( _
+Public Function TableBasicsTryCopyTableToDictionary( _
     ByVal Tbl As ListObject, _
     Optional ByRef Dict As Dictionary _
     ) As Boolean
 
-    Const RoutineName As String = Module_Name & "TryCopyTableToDictionary"
+    Const RoutineName As String = Module_Name & "TableBasicsTryCopyTableToDictionary"
     On Error GoTo ErrorHandler
-    TryCopyTableToDictionary = True
+    TableBasicsTryCopyTableToDictionary = True
 
     Dim Ary As Variant
     Ary = Tbl.DataBodyRange
     If Err.Number <> 0 Then
         MsgBox "The TableBasics table is empty"
-        TryCopyTableToDictionary = False
+        TableBasicsTryCopyTableToDictionary = False
         GoTo Done
     End If
     Err.Clear
@@ -48,11 +52,11 @@ Public Function TryCopyTableToDictionary( _
         Set ThisDict = pTableBasicsDict
     End If
 
-    If TableBasics.TryCopyArrayToDictionary(Ary, ThisDict) Then
+    If TableBasicsTryCopyArrayToDictionary(Ary, ThisDict) Then
         ' Success; do nothing
     Else
         ReportError "Error copying array to dictionary", "Routine", RoutineName
-        TryCopyTableToDictionary = False
+        TableBasicsTryCopyTableToDictionary = False
         GoTo Done
     End If
 
@@ -66,29 +70,60 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TryCopyTableToDictionary
+End Function ' TableBasicsTryCopyTableToDictionary
 
-Public Property Get Headers() As Variant
-    Headers = Array("TableName")
-End Property
+Public Function TableBasicsTryCopyDictionaryToTable( _
+       ByVal Dict As Dictionary, _
+       Optional ByVal Table As ListObject = Nothing, _
+       Optional TableCorner As Range = Nothing, _
+       Optional TableName As String _
+       ) As Boolean
 
-Public Property Get TableBasicsDictionary() As Dictionary
-   Set TableBasicsDictionary = pTableBasicsDict
-End Property
+    ' This routine copies a dictionary to a table
+    ' If Dict is nothing then use default dictionary
+    ' If Table is nothing then build a table using TableCorner and TableName
+    ' if Table and TableCorner are both Nothing then use TableDetailsTable
 
-Public Property Get TableBasicsHeaderWidth() As Long
+    Const RoutineName As String = Module_Name & "TableBasicsTryCopyDictionaryToTable"
+    On Error GoTo ErrorHandler
+
+    TableBasicsTryCopyDictionaryToTable = True
+
+    If Not pInitialized Then TableBasicsInitialize
+
+    Dim ClassName As TableBasics_Table
+    Set ClassName = New TableBasics_Table
+
+    '    FormatColumnAsText pFirstColumn, Table, TableCorner
+
+    If Table.TryCopyDictionaryToTable(ClassName, Dict, Table, TableCorner, TableName) Then
+        ' Success; do
+    Else
+        MsgBox "Error copying TableBasics dictionary to table"
+        TableBasicsTryCopyDictionaryToTable = False
+    End If
+
+Done:
+    Exit Function
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Function ' TableBasicsTryCopyDictionaryToTable
+
+Private Property Get TableBasicsHeaderWidth() As Long
     TableBasicsHeaderWidth = pHeaderWidth
 End Property
 
-Public Property Get TableBasicsInitialized() As Boolean
-    TableBasicsInitialized = pInitialized
+Private Property Get TableBasicsHeaders() As Variant
+    TableBasicsHeaders = Array("Table Name")
 End Property
 
-Public Sub Initialize()
+Private Sub TableBasicsInitialize()
 
-    ' This routine loads the dictionary
-
-    Const RoutineName As String = Module_Name & "Initialize"
+    Const RoutineName As String = Module_Name & "TableBasicsInitialize"
     On Error GoTo ErrorHandler
 
     pInitialized = True
@@ -97,10 +132,10 @@ Public Sub Initialize()
     Set TableBasics = New TableBasics_Table
 
     Set pTableBasicsDict = New Dictionary
-    If Table.TryCopyTableToDictionary(TableBasics, TableBasicsTable, pTableBasicsDict) Then
+    If TableBasicsTryCopyTableToDictionary(TableBasicsTable, pTableBasicsDict) Then
         ' Success; do nothing
     Else
-        MsgBox "Error copying TableDetails table"
+        MsgBox "Error copying TableBasics table"
         pInitialized = False
         GoTo Done
     End If
@@ -113,15 +148,13 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' Initialize
+End Sub ' TableBasicsInitialize
 
-Public Sub CopyDictionaryToArray( _
+Private Sub TableBasicsCopyDictionaryToArray( _
     ByVal DetailsDict As Dictionary, _
        ByRef Ary As Variant)
 
-    ' loads TableDetails Dict into Ary
-
-    Const RoutineName As String = Module_Name & "CopyDictionaryToArray"
+    Const RoutineName As String = Module_Name & "TableBasicsCopyDictionaryToArray"
     On Error GoTo ErrorHandler
 
     Dim I As Long
@@ -144,18 +177,16 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' CopyDictionaryToArray
+End Sub ' TableBasicsCopyDictionaryToArray
 
-Public Function TryCopyArrayToDictionary( _
+Private Function TableBasicsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
        ByRef Dict As Dictionary)
 
-    ' Copy TableDetails array to dictionary
-
-    Const RoutineName As String = Module_Name & "TryCopyArrayToDictionary"
+    Const RoutineName As String = Module_Name & "TableBasicsTryCopyArrayToDictionary"
     On Error GoTo ErrorHandler
 
-    TryCopyArrayToDictionary = True
+    TableBasicsTryCopyArrayToDictionary = True
 
     Dim I As Long
 
@@ -170,7 +201,7 @@ Public Function TryCopyArrayToDictionary( _
 
             If Dict.Exists(Key) Then
                 MsgBox "Duplicate key"
-                TryCopyArrayToDictionary = False
+                TableBasicsTryCopyArrayToDictionary = False
                 GoTo Done
             Else
                 Set Record = New TableBasics_Table
@@ -195,45 +226,5 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TryCopyArrayToDictionary
-
-Public Function TryCopyDictionaryToTable( _
-       ByVal Dict As Dictionary, _
-       Optional ByVal Table As ListObject = Nothing, _
-       Optional TableCorner As Range = Nothing, _
-       Optional TableName As String _
-       ) As Boolean
-
-    ' This routine copies a dictionary to a table
-    ' If Dict is nothing then use default dictionary
-    ' If Table is nothing then build a table using TableCorner and TableName
-    ' if Table and TableCorner are both Nothing then use TableDetailsTable
-
-    Const RoutineName As String = Module_Name & "TryCopyDictionaryToTable"
-    On Error GoTo ErrorHandler
-
-    TryCopyDictionaryToTable = True
-
-    If Not pInitialized Then TableDetails.Initialize
-
-    Dim ClassName As TableBasics_Table
-    Set ClassName = New TableBasics_Table
-
-    '    FormatColumnAsText pFirstColumn, Table, TableCorner
-
-    If Table.TryCopyDictionaryToTable(ClassName, Dict, Table, TableCorner, TableName) Then
-        ' Success; do
-    Else
-        MsgBox "Error copying TableBasics dictionary to table"
-    End If
-
-Done:
-    Exit Function
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TryCopyDictionaryToTable
+End Function ' TableBasicsTryCopyArrayToDictionary
 

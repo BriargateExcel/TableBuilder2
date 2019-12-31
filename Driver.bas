@@ -13,9 +13,20 @@ Public Sub Main()
     Dim TableName As String
     Dim ClassName As String
     Dim Sheet As Variant
+    Dim DetailsTable As ListObject
+    Dim BasicsTable As ListObject
     
     For Each Sheet In ThisWorkbook.Worksheets
-        If TableBasics.TryCopyTableToDictionary(Sheet.ListObjects(2), BasicDict) Then
+        Set BasicsTable = Sheet.ListObjects(2)
+        If BasicsTable.HeaderRowRange(1, 1) <> "Table Name" Then
+            Set BasicsTable = Sheet.ListObjects(1)
+            Set DetailsTable = Sheet.ListObjects(2)
+        Else
+            Set BasicsTable = Sheet.ListObjects(2)
+            Set DetailsTable = Sheet.ListObjects(1)
+        End If
+        
+        If TableBasicsTryCopyTableToDictionary(BasicsTable, BasicDict) Then
             ' Success; do nothing
         Else
             ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
@@ -24,7 +35,7 @@ Public Sub Main()
         TableName = BasicDict.Items(0)
         ClassName = TableName & "_Table"
         
-        If TableDetails.TryCopyTableToDictionary(Sheet.ListObjects(1), DetailsDict) Then
+        If TableDetailsTryCopyTableToDictionary(DetailsTable, DetailsDict) Then
             ' Success; do nothing
         Else
             ReportError "Error copying Table to dictionary", "Routine", RoutineName
@@ -35,6 +46,8 @@ Public Sub Main()
         ModuleBuilder.ModuleBuilder DetailsDict, TableName, ClassName
     Next Sheet
 
+    MsgBox "Files built", vbOKOnly
+    
 Done:
     Exit Sub
 ErrorHandler:

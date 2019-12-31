@@ -252,7 +252,7 @@ ErrorHandler:
 End Function ' TryGetFilesInFolder
 
 Public Function BuildFullTracePath( _
-       ByVal Filename As String, _
+       ByVal FileName As String, _
        Optional ByVal FilePath As String = vbNullString _
        ) As String
 
@@ -261,10 +261,10 @@ Public Function BuildFullTracePath( _
     ' Returns a string with the full path
 
     Dim pFileName As String
-    If Right$(Filename, 4) <> ".txt" Then
-        pFileName = Filename & ".txt"
+    If Right$(FileName, 4) <> ".txt" Then
+        pFileName = FileName & ".txt"
     Else
-        pFileName = Filename
+        pFileName = FileName
     End If
 
     Dim pFilePath As String

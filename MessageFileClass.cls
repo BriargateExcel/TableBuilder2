@@ -18,6 +18,8 @@ Option Explicit
 '   Added ReportError for exceptions
 ' 12/30/19
 '   Added ability to specify foldername
+'   Omit the closing message for Class and Basic module files
+'   Optionally overwrite the file if it exists
 
 ' Purpose
 ' This class implements an error handling approach where a caller can
@@ -58,11 +60,17 @@ Private Const Module_Name As String = "MessageFileClass."
 
 Private pMessageStream As TextStream
 Private pStreamName As String
+Private pMessageFolderPath As String
+
+Public Property Get MessageFolderPath() As String
+    MessageFolderPath = pMessageFolderPath
+End Property
 
 Public Sub WriteMessageLine( _
        ByVal Message As String, _
        ByVal StreamName As String, _
-       Optional ByVal FolderName As String = vbNullString)
+       Optional ByVal FolderName As String = vbNullString, _
+       Optional ByVal OverWrite As Boolean = False)
 
     ' This routine writes one line to pErrorStream
     
@@ -72,7 +80,7 @@ Public Sub WriteMessageLine( _
     FolderName = IIf(FolderName = vbNullString, StreamName, FolderName)
     
     If pMessageStream Is Nothing Then
-        CreateMessageStream StreamName, FolderName
+        CreateMessageStream StreamName, FolderName, OverWrite
         pStreamName = StreamName
     End If
     
@@ -116,7 +124,8 @@ End Sub ' WriteBlankMessageLines
 
 Private Sub CreateMessageStream( _
     ByVal StreamName As String, _
-    Optional ByVal FolderName As String)
+    Optional ByVal FolderName As String, _
+    Optional ByVal OverWrite As Boolean = False)
 
     ' This routine creates an Error Message folder
     ' on the user's desktop if one does not already exist.
@@ -131,28 +140,35 @@ Private Sub CreateMessageStream( _
     Dim DF As String
     DF = DesktopFolder
     
-    Dim MessageFolderPath As String
-    MessageFolderPath = DF & Application.PathSeparator & FolderName
+    pMessageFolderPath = DF & Application.PathSeparator & FolderName
     
-    If FSO.FolderExists(MessageFolderPath) Then
+    If FSO.FolderExists(pMessageFolderPath) Then
         ' Folder exists. Do nothing.
     Else
         ' Folder does not exist. Create it.
-        FSO.CreateFolder MessageFolderPath
+        FSO.CreateFolder pMessageFolderPath
     End If
-    ' Message folder now exists on Desktop
- 
+   ' Message folder now exists on Desktop
+   
+    Dim FileName As String
     Dim FileNumber As Long
     FileNumber = 1
     
-    While FSO.FileExists(MessageFolderPath & Application.PathSeparator & StreamName & FileNumber & ".txt")
-        FileNumber = FileNumber + 1
-    Wend
- 
-    Dim MessageFile As String
-    MessageFile = MessageFolderPath & Application.PathSeparator & StreamName & FileNumber & ".txt"
+    If OverWrite Then
+       FileName = pMessageFolderPath & Application.PathSeparator & StreamName
+       
+       If FSO.FileExists(FileName) Then
+           FSO.DeleteFile FileName, True
+       End If
+    Else
+       While FSO.FileExists(pMessageFolderPath & Application.PathSeparator & StreamName & FileNumber & ".txt")
+           FileNumber = FileNumber + 1
+       Wend
     
-    Set pMessageStream = FSO.CreateTextFile(MessageFile)
+       FileName = pMessageFolderPath & Application.PathSeparator & StreamName & FileNumber & ".txt"
+    End If
+    
+    Set pMessageStream = FSO.CreateTextFile(FileName)
  
 Done:
     Exit Sub
@@ -166,6 +182,12 @@ End Sub ' CreateMessageStream
 
 Private Sub Class_Terminate()
     ' Tell the user if a message file was created
+    If Right(pStreamName, 4) = ".cls" Or Right(pStreamName, 4) = ".bas" Then
+        pMessageStream.Close
+        Set pMessageStream = Nothing
+        GoTo Done
+    End If
+    
     If Not pMessageStream Is Nothing Then
         MsgBox "Check the " & pStreamName & " folder on your Desktop." & vbCrLf _
              & "See the " & pStreamName & " file in that folder " & _
@@ -175,7 +197,7 @@ Private Sub Class_Terminate()
         pMessageStream.Close
         Set pMessageStream = Nothing
     End If
-
+Done:
 End Sub ' Class_Terminate
 
 
