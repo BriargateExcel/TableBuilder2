@@ -27,11 +27,15 @@ End Property
 Public Sub Initialize()
 End Sub
 
-Public Sub CopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant)
-End Sub
+Public Function TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean
+End Function
 
 Public Function TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
 End Function
+
+Public Sub FormatWorksheet(ByVal Table As ListObject)
+End Sub
+
 
 ' An example of how to create a Class module that uses this interface:
 'Option Explicit
@@ -260,8 +264,4 @@ End Function
 '    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 'End Function ' TryCopyCAMDictionaryToTable
 '
-
-
-
-
 

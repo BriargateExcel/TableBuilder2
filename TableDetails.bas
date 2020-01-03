@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 12/31/2019 12:09:32 PM
+' Built on 1/1/2020 9:32:28 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -12,9 +12,8 @@ Private pTableDetailsDict As Dictionary
 
 Private Const pColumnHeaderColumn As Long = 1
 Private Const pVariableNameColumn As Long = 2
-Private Const pFormattedColumn As Long = 3
-Private Const pVariableTypeColumn As Long = 4
-Private Const pHeaderWidth As Long = 4
+Private Const pVariableTypeColumn As Long = 3
+Private Const pHeaderWidth As Long = 3
 
 Public Property Get TableDetailsTable() As ListObject
     Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
@@ -24,107 +23,24 @@ Public Property Get TableDetailsDictionary() As Dictionary
    Set TableDetailsDictionary = pTableDetailsDict
 End Property
 
+Public Property Get TableDetailsInitialized() As Boolean
+   TableDetailsInitialized = pInitialized
+End Property
+
 Public Sub TableDetailsReset()
     pInitialized = False
     Set pTableDetailsDict = Nothing
 End Sub
 
-Public Function TableDetailsTryCopyTableToDictionary( _
-    ByVal Tbl As ListObject, _
-    Optional ByRef Dict As Dictionary _
-    ) As Boolean
-
-    Const RoutineName As String = Module_Name & "TableDetailsTryCopyTableToDictionary"
-    On Error GoTo ErrorHandler
-    TableDetailsTryCopyTableToDictionary = True
-
-    Dim Ary As Variant
-    Ary = Tbl.DataBodyRange
-    If Err.Number <> 0 Then
-        MsgBox "The TableDetails table is empty"
-        TableDetailsTryCopyTableToDictionary = False
-        GoTo Done
-    End If
-    Err.Clear
-    On Error GoTo ErrorHandler
-
-    Dim ThisDict As Dictionary
-    If Dict Is Nothing Then
-        Set ThisDict = New Dictionary
-    Else
-        Set ThisDict = pTableDetailsDict
-    End If
-
-    If TableDetailsTryCopyArrayToDictionary(Ary, ThisDict) Then
-        ' Success; do nothing
-    Else
-        ReportError "Error copying array to dictionary", "Routine", RoutineName
-        TableDetailsTryCopyTableToDictionary = False
-        GoTo Done
-    End If
-
-    Set Dict = ThisDict
-
-Done:
-    Exit Function
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TableDetailsTryCopyTableToDictionary
-
-Public Function TableDetailsTryCopyDictionaryToTable( _
-       ByVal Dict As Dictionary, _
-       Optional ByVal Table As ListObject = Nothing, _
-       Optional TableCorner As Range = Nothing, _
-       Optional TableName As String _
-       ) As Boolean
-
-    ' This routine copies a dictionary to a table
-    ' If Dict is nothing then use default dictionary
-    ' If Table is nothing then build a table using TableCorner and TableName
-    ' if Table and TableCorner are both Nothing then use TableDetailsTable
-
-    Const RoutineName As String = Module_Name & "TableDetailsTryCopyDictionaryToTable"
-    On Error GoTo ErrorHandler
-
-    TableDetailsTryCopyDictionaryToTable = True
-
-    If Not pInitialized Then TableDetailsInitialize
-
-    Dim ClassName As TableDetails_Table
-    Set ClassName = New TableDetails_Table
-
-    '    FormatColumnAsText pFirstColumn, Table, TableCorner
-
-    If Table.TryCopyDictionaryToTable(ClassName, Dict, Table, TableCorner, TableName) Then
-        ' Success; do
-    Else
-        MsgBox "Error copying TableDetails dictionary to table"
-        TableDetailsTryCopyDictionaryToTable = False
-    End If
-
-Done:
-    Exit Function
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TableDetailsTryCopyDictionaryToTable
-
-Private Property Get TableDetailsHeaderWidth() As Long
+Public Property Get TableDetailsHeaderWidth() As Long
     TableDetailsHeaderWidth = pHeaderWidth
 End Property
 
-Private Property Get TableDetailsHeaders() As Variant
-    TableDetailsHeaders = Array("Column Header", "Variable Name", "Formatted?", "Type")
+Public Property Get TableDetailsHeaders() As Variant
+    TableDetailsHeaders = Array("Column Header", "Variable Name", "Type")
 End Property
 
-Private Sub TableDetailsInitialize()
+Public Sub TableDetailsInitialize()
 
     Const RoutineName As String = Module_Name & "TableDetailsInitialize"
     On Error GoTo ErrorHandler
@@ -135,7 +51,7 @@ Private Sub TableDetailsInitialize()
     Set TableDetails = New TableDetails_Table
 
     Set pTableDetailsDict = New Dictionary
-    If TableDetailsTryCopyTableToDictionary(TableDetailsTable, pTableDetailsDict) Then
+    If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, pTableDetailsDict) Then
         ' Success; do nothing
     Else
         MsgBox "Error copying TableDetails table"
@@ -153,39 +69,46 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableDetailsInitialize
 
-Private Sub TableDetailsCopyDictionaryToArray( _
-    ByVal DetailsDict As Dictionary, _
-       ByRef Ary As Variant)
+Public Function TableDetailsTryCopyDictionaryToArray( _
+    ByVal Dict As Dictionary, _
+    ByRef Ary As Variant _
+    ) As Boolean
 
-    Const RoutineName As String = Module_Name & "TableDetailsCopyDictionaryToArray"
+    Const RoutineName As String = Module_Name & "TableDetailsTryCopyDictionaryToArray"
     On Error GoTo ErrorHandler
 
+    TableDetailsTryCopyDictionaryToArray = True
+
+    If Dict.Count = 0 Then
+        ReportError "Error copying TableDetails dictionary to array,", "Routine", RoutineName
+        TableDetailsTryCopyDictionaryToArray = False
+        GoTo Done
+    End If
     Dim I As Long
     I = 1
 
     Dim Record As TableDetails_Table
     Dim Entry As Variant
-    For Each Entry In DetailsDict.Keys
-        Set Record = DetailsDict.Item(Entry)
+    For Each Entry In Dict.Keys
+        Set Record = Dict.Item(Entry)
 
         Ary(I, pColumnHeaderColumn) = Record.ColumnHeader
         Ary(I, pVariableNameColumn) = Record.VariableName
-        Ary(I, pFormattedColumn) = Record.Formatted
         Ary(I, pVariableTypeColumn) = Record.VariableType
 
         I = I + 1
     Next Entry
 Done:
-    Exit Sub
+    Exit Function
 ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableDetailsCopyDictionaryToArray
+End Function ' TableDetailsTryCopyDictionaryToArray
 
-Private Function TableDetailsTryCopyArrayToDictionary( _
+Public Function TableDetailsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
        ByRef Dict As Dictionary)
 
@@ -214,7 +137,6 @@ Private Function TableDetailsTryCopyArrayToDictionary( _
 
                 Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
                 Record.VariableName = Ary(I, pVariableNameColumn)
-                Record.Formatted = IIf(Ary(I, pFormattedColumn) = "Yes", True, False)
                 Record.VariableType = Ary(I, pVariableTypeColumn)
 
                 Dict.Add Key, Record
@@ -236,4 +158,28 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyArrayToDictionary
+
+Public Sub TableDetailsFormatWorksheet(ByVal Table As ListObject)
+
+    Const RoutineName As String = Module_Name & "TableDetailsFormatWorksheet"
+    On Error GoTo ErrorHandler
+
+    ' Worksheet formatting goes here
+
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' TableDetailsFormatWorksheet
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'             End of Generated code                '
+'            Start unique code here                '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 

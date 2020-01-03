@@ -15,6 +15,11 @@ Public Sub Main()
     Dim Sheet As Variant
     Dim DetailsTable As ListObject
     Dim BasicsTable As ListObject
+    Dim TableDetails As TableDetails_Table
+    Set TableDetails = New TableDetails_Table
+    
+    Dim TableBasics As TableBasics_Table
+    Set TableBasics = New TableBasics_Table
     
     For Each Sheet In ThisWorkbook.Worksheets
         Set BasicsTable = Sheet.ListObjects(2)
@@ -26,7 +31,7 @@ Public Sub Main()
             Set DetailsTable = Sheet.ListObjects(1)
         End If
         
-        If TableBasicsTryCopyTableToDictionary(BasicsTable, BasicDict) Then
+        If Table.TryCopyTableToDictionary(TableBasics, BasicsTable, BasicDict) Then
             ' Success; do nothing
         Else
             ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
@@ -35,7 +40,7 @@ Public Sub Main()
         TableName = BasicDict.Items(0)
         ClassName = TableName & "_Table"
         
-        If TableDetailsTryCopyTableToDictionary(DetailsTable, DetailsDict) Then
+        If Table.TryCopyTableToDictionary(TableDetails, DetailsTable, DetailsDict) Then
             ' Success; do nothing
         Else
             ReportError "Error copying Table to dictionary", "Routine", RoutineName

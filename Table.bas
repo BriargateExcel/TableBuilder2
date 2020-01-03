@@ -4,19 +4,19 @@ Option Explicit
 Private Const Module_Name As String = "Table."
 
 Public Function TryCopyDictionaryToTable( _
-       ByVal TableType As iTable, _
-       Optional ByVal Dict As Dictionary = Nothing, _
-       Optional ByVal Tbl As ListObject = Nothing, _
-       Optional ByVal Rng As Range = Nothing, _
-       Optional ByVal TableName As String = vbNullString _
-       ) As Boolean
+    ByVal TableType As iTable, _
+    Optional ByVal Dict As Dictionary = Nothing, _
+    Optional ByVal Tbl As ListObject = Nothing, _
+    Optional ByVal Rng As Range = Nothing, _
+    Optional ByVal TableName As String = vbNullString _
+    ) As Boolean
 
     ' This routine copies a dictionary to a table
     ' If Dict is nothing then use pLocalDict dictionary
     ' If Tbl is nothing then build a table using Rng and TableName
     ' if Tbl and Rng are both Nothing then use the main table
-    
-    Const RoutineName As String = Module_Name & "TryCopyDictionaryToTable"
+
+    Const RoutineName As String = Module_Name & "CopyDictionaryToTable"
     On Error GoTo ErrorHandler
     
     TryCopyDictionaryToTable = True
@@ -35,13 +35,12 @@ Public Function TryCopyDictionaryToTable( _
             Set ThisTbl = TableType.LocalTable
         Else
             If TableName = vbNullString Then
-                MsgBox "Need to provide a table name"
+                ReportError "Need to provide a table name", "Routine", RoutineName
                 TryCopyDictionaryToTable = False
                 GoTo Done
             Else
-                Set ThisTbl = Rng.Parent.ListObjects.Add( _
-                              xlSrcRange, _
-                              Range(Cells(1, 1), Cells(2, TableType.HeaderWidth)), , xlYes)
+                Set ThisTbl = Rng.Parent.ListObjects.Add(xlSrcRange, _
+                    Range(Cells(1, 1), Cells(2, TableType.HeaderWidth)), , xlYes)
                 ThisTbl.Name = TableName
             End If
         End If
@@ -55,16 +54,26 @@ Public Function TryCopyDictionaryToTable( _
     Dim ThisRng As Range
     Set ThisRng = ThisTbl.Parent.Range(AddressPieces(0))
 
-    ThisRng.Offset.Resize(1, TableType.HeaderWidth) = TableType.Headers
+    ThisRng.Resize(1, TableType.HeaderWidth) = TableType.Headers
 
     Dim Ary As Variant
     ReDim Ary(1 To ThisDict.Count, 1 To TableType.HeaderWidth)
 
-    TableType.CopyDictionaryToArray ThisDict, Ary
+    If TableType.TryCopyDictionaryToArray(ThisDict, Ary) Then
+        ' Success; do nothing
+    Else
+        ReportError "Error copying dictionary to array", "Routine", RoutineName
+        TryCopyDictionaryToTable = False
+        GoTo Done
+    End If
 
+    ' Format the worksheet
+    TableType.FormatWorksheet ThisTbl
+    
     ' move to DatabodyRange
     Set ThisRng = ThisRng.Offset(1, 0)
     ThisRng.Resize(UBound(Ary, 1), TableType.HeaderWidth) = Ary
+    ThisRng.Resize(UBound(Ary, 1), TableType.HeaderWidth) = Ary ' Seems to be needed to get the column formatting right
 
     ThisRng.Parent.Cells.EntireColumn.AutoFit
 
@@ -85,13 +94,13 @@ ErrorHandler:
 End Function ' TryCopyDictionaryToTable
 
 Public Function TryCopyTableToDictionary( _
-       ByVal TableType As iTable, _
-       ByVal Tbl As ListObject, _
-       Optional ByRef Dict As Dictionary _
-       ) As Boolean
+    ByVal TableType As iTable, _
+    ByVal Tbl As ListObject, _
+    Optional ByRef Dict As Dictionary _
+    ) As Boolean
 
     ' Copies a table to a dictionary
-    
+
     Const RoutineName As String = Module_Name & "TryCopyTableToDictionary"
     On Error GoTo ErrorHandler
 
@@ -101,7 +110,7 @@ Public Function TryCopyTableToDictionary( _
     On Error Resume Next
     Ary = Tbl.DataBodyRange
     If Err.Number <> 0 Then
-        MsgBox "The table is empty"
+        ReportError "The table is empty", "Routine", RoutineName
         TryCopyTableToDictionary = False
         GoTo Done
     End If
@@ -118,7 +127,7 @@ Public Function TryCopyTableToDictionary( _
     If TableType.TryCopyArrayToDictionary(Ary, ThisDict) Then
         ' Success; do nothing
     Else
-        MsgBox "Error loading dictionary"
+        ReportError "Error loading dictionary", "Routine", RoutineName
     End If
 
     Set Dict = ThisDict
@@ -132,4 +141,5 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TryCopyTableToDictionary
+
 

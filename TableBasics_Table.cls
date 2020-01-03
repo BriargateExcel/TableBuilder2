@@ -8,8 +8,9 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+Implements iTable
 
-' Built on 12/31/2019 12:09:32 PM
+' Built on 1/1/2020 9:32:28 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -22,4 +23,40 @@ End Property
 Public Property Let TableName(ByVal Param As String)
     pTableName = Param
 End Property
+
+Public Property Get iTable_LocalDictionary() As Dictionary
+    Set iTable_LocalDictionary = TableBasicsDictionary
+End Property
+
+Public Property Get iTable_HeaderWidth() As Long
+    iTable_HeaderWidth = TableBasicsHeaderWidth
+End Property
+
+Public Property Get iTable_Headers() As Variant
+    iTable_Headers = TableBasicsHeaders
+End Property
+
+Public Property Get iTable_Initialized() As Boolean
+    iTable_Initialized = TableBasicsInitialized
+End Property
+
+Public Property Get iTable_LocalTable() As ListObject
+    Set iTable_LocalTable = TableBasicsTable
+End Property
+
+Public Sub iTable_Initialize()
+    TableBasicsInitialize
+End Sub
+
+Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
+    iTable_TryCopyArrayToDictionary = TableBasicsTryCopyArrayToDictionary(Ary, Dict)
+End Function
+
+Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean
+    iTable_TryCopyDictionaryToArray = TableBasicsTryCopyDictionaryToArray(Dict, Ary)
+End Function
+
+Public Sub iTable_FormatWorksheet(ByVal Table As ListObject)
+    TableBasicsFormatWorksheet Table
+End Sub
 

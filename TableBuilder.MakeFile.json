@@ -12,7 +12,9 @@
 		"Driver": "Driver.bas",
 		"ClassBuilder": "ClassBuilder.bas",
 		"ModuleBuilder": "ModuleBuilder.bas",
-		"TableDetails": "TableDetails.bas"
+		"TableDetails": "TableDetails.bas",
+		"iTable": "iTable.cls",
+		"Table": "Table.bas"
 	},
 	"References": [
 		{

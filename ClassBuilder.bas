@@ -23,6 +23,10 @@ Public Sub ClassBuilder( _
     
     Dim Line As String
     
+    '
+    ' Declarations
+    '
+
     Line = _
         "VERSION 1.0 CLASS" & vbCrLf & _
         "BEGIN" & vbCrLf & _
@@ -34,6 +38,7 @@ Public Sub ClassBuilder( _
         "Attribute VB_PredeclaredId = False" & vbCrLf & _
         "Attribute VB_Exposed = False" & vbCrLf & _
         "Option Explicit" & vbCrLf & _
+        "Implements iTable" & vbCrLf & _
         vbCrLf & _
         "' Built on " & Now() & vbCrLf & _
         "' Built By Briargate Excel Table Builder" & vbCrLf & _
@@ -42,6 +47,10 @@ Public Sub ClassBuilder( _
     
     Dim Entry As Variant
     
+    '
+    ' Constants
+    '
+
     For Each Entry In DetailsDict.Keys
         Line = "Private p" & DetailsDict.Item(Entry).VariableName & " As " & DetailsDict.Item(Entry).VariableType
         StreamFile.WriteMessageLine Line, StreamName
@@ -49,10 +58,117 @@ Public Sub ClassBuilder( _
     
     StreamFile.WriteBlankMessageLines StreamName
     
+    '
+    ' Properties
+    '
+
     For Each Entry In DetailsDict.Keys
         BuildProperties StreamFile, StreamName, DetailsDict.Item(Entry)
     Next Entry
         
+    '
+    ' Local Dictionary
+    '
+
+    Line = _
+        "Public Property Get iTable_LocalDictionary() As Dictionary" & vbCrLf & _
+        "    Set iTable_LocalDictionary = " & TableName & "Dictionary" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' HeaderWidth
+    '
+
+    Line = _
+        "Public Property Get iTable_HeaderWidth() As Long" & vbCrLf & _
+        "    iTable_HeaderWidth = " & TableName & "HeaderWidth" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' Headers
+    '
+
+    Line = _
+        "Public Property Get iTable_Headers() As Variant" & vbCrLf & _
+        "    iTable_Headers = " & TableName & "Headers" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' Get Initialized
+    '
+
+    Line = _
+        "Public Property Get iTable_Initialized() As Boolean" & vbCrLf & _
+        "    iTable_Initialized = " & TableName & "Initialized" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' Local Table
+    '
+
+    Line = _
+        "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
+        "    Set iTable_Localtable = " & TableName & "Table" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' Initialize
+    '
+
+    Line = _
+        "Public Sub iTable_Initialize()" & vbCrLf & _
+        "    " & TableName & "Initialize" & vbCrLf & _
+        "End Sub" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' TryCopyArrayToDictionary
+    '
+
+    Line = _
+        "Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean" & vbCrLf & _
+        "    iTable_TryCopyArrayToDictionary = " & TableName & "TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
+        "End Function" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' TryCopyDictionaryToArray
+    '
+
+    Line = _
+        "Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean" & vbCrLf & _
+        "    iTable_TryCopyDictionaryToArray = " & TableName & "TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
+        "End Function" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' FormatWorksheet
+    '
+
+    Line = _
+        "Public Sub iTable_FormatWorksheet(ByVal Table As ListObject)" & vbCrLf & _
+        "    " & TableName & "FormatWorksheet Table" & vbCrLf & _
+        "End Sub" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' End of generated code comment
+    '
+
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'             End of Generated code                '" & vbCrLf & _
+        "'            Start unique code here                '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
     Set StreamFile = Nothing
 
 Done:
