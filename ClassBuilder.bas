@@ -55,8 +55,16 @@ Public Sub ClassBuilder( _
         Line = "Private p" & DetailsDict.Item(Entry).VariableName & " As " & DetailsDict.Item(Entry).VariableType
         StreamFile.WriteMessageLine Line, StreamName
     Next Entry
-    
     StreamFile.WriteBlankMessageLines StreamName
+    
+    '
+    ' Added for headcount tool
+    '
+
+    Line = _
+        "Private pEntry As String ' Added for headcount tool" & vbCrLf & _
+        "Private pRecord As iTable ' Added for headcount tool" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' Properties
@@ -165,6 +173,71 @@ Public Sub ClassBuilder( _
         "'                                                  '" & vbCrLf & _
         "'             End of Generated code                '" & vbCrLf & _
         "'            Start unique code here                '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'          Start of headcount unique code          '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_EmployeeNumber(ByVal Entry As String) As String" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_EmployeeNumber = pRecord.EmployeeNumber" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_Month(ByVal Entry As String) As Date" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_Month = pRecord.Month" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_ControlAccount(ByVal Entry As String) As String" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_ControlAccount = pRecord.ControlAccount" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_ChargeNumber(ByVal Entry As String) As String" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_ChargeNumber = pRecord.ChargeNumber" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_BudEPs(ByVal Entry As String) As Single" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_BudEPs = pRecord.BudEPs" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_EstEPs(ByVal Entry As String) As Single" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_EstEPs = pRecord.EstEPs" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "Public Property Get iTable_ActHrs(ByVal Entry As String) As Single" & vbCrLf & _
+        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
+        "    iTable_ActHrs = pRecord.ActHrs" & vbCrLf & _
+        "End Property" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'             End of headcount unique code         '" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
