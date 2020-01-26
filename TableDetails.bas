@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 1/1/2020 9:32:28 AM
+' Built on 1/26/2020 12:10:13 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -10,13 +10,33 @@ Private Const Module_Name As String = "TableDetails."
 Private pInitialized As Boolean
 Private pTableDetailsDict As Dictionary
 
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 Private Const pColumnHeaderColumn As Long = 1
 Private Const pVariableNameColumn As Long = 2
 Private Const pVariableTypeColumn As Long = 3
 Private Const pHeaderWidth As Long = 3
 
-Public Property Get TableDetailsTable() As ListObject
-    Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
+Public Property Get TableDetailsColumnHeaderColumn() As Long
+    TableDetailsColumnHeaderColumn = pColumnHeaderColumn
+End Property
+
+Public Property Get TableDetailsVariableNameColumn() As Long
+    TableDetailsVariableNameColumn = pVariableNameColumn
+End Property
+
+Public Property Get TableDetailsVariableTypeColumn() As Long
+    TableDetailsVariableTypeColumn = pVariableTypeColumn
 End Property
 
 Public Property Get TableDetailsDictionary() As Dictionary
@@ -37,7 +57,10 @@ Public Property Get TableDetailsHeaderWidth() As Long
 End Property
 
 Public Property Get TableDetailsHeaders() As Variant
-    TableDetailsHeaders = Array("Column Header", "Variable Name", "Type")
+    TableDetailsHeaders = Array( _
+        "Column Header", _
+        "Variable Name", _
+        "Type")
 End Property
 
 Public Sub TableDetailsInitialize()
@@ -45,16 +68,14 @@ Public Sub TableDetailsInitialize()
     Const RoutineName As String = Module_Name & "TableDetailsInitialize"
     On Error GoTo ErrorHandler
 
-    pInitialized = True
-
     Dim TableDetails As TableDetails_Table
     Set TableDetails = New TableDetails_Table
 
     Set pTableDetailsDict = New Dictionary
     If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, pTableDetailsDict) Then
-        ' Success; do nothing
+        pInitialized = True
     Else
-        MsgBox "Error copying TableDetails table"
+        ReportError "Error copying TableDetails table", "Routine", RoutineName
         pInitialized = False
         GoTo Done
     End If
@@ -84,6 +105,7 @@ Public Function TableDetailsTryCopyDictionaryToArray( _
         TableDetailsTryCopyDictionaryToArray = False
         GoTo Done
     End If
+
     Dim I As Long
     I = 1
 
@@ -98,6 +120,7 @@ Public Function TableDetailsTryCopyDictionaryToArray( _
 
         I = I + 1
     Next Entry
+
 Done:
     Exit Function
 ErrorHandler:
@@ -107,6 +130,20 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyDictionaryToArray
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'         The routines that follow may need        '
+'        changes depending on the application      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Public Property Get TableDetailsTable() As ListObject
+
+    ' Change the table reference if the table is in another workbook
+
+    Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
+End Property
 
 Public Function TableDetailsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
@@ -126,10 +163,11 @@ Public Function TableDetailsTryCopyArrayToDictionary( _
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
+            ' May have to change the key to generate unique keys
             Key = Ary(I, pColumnHeaderColumn)
 
             If Dict.Exists(Key) Then
-                MsgBox "Duplicate key"
+                ReportWarning "Duplicate key", "Routine", RoutineName, "Key", Key
                 TableDetailsTryCopyArrayToDictionary = False
                 GoTo Done
             Else
@@ -147,8 +185,6 @@ Public Function TableDetailsTryCopyArrayToDictionary( _
         Dict.Add Ary, Ary
     End If
 
-    '    Array formatting goes here
-
 Done:
     Exit Function
 ErrorHandler:
@@ -159,12 +195,14 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyArrayToDictionary
 
-Public Sub TableDetailsFormatWorksheet(ByVal Table As ListObject)
+Public Sub TableDetailsFormatArrayAndWorksheet( _
+    ByRef Ary As Variant, _
+    ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "TableDetailsFormatWorksheet"
+    Const RoutineName As String = Module_Name & "TableDetailsFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
-    ' Worksheet formatting goes here
+    ' Array and Table formatting goes here
 
 Done:
     Exit Sub
@@ -174,7 +212,7 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableDetailsFormatWorksheet
+End Sub ' TableDetailsFormatArrayAndWorksheet
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '

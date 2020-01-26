@@ -27,12 +27,12 @@ Public Sub ClassBuilder( _
     ' Declarations
     '
 
-    Line = _
+    Line = PrintString( _
         "VERSION 1.0 CLASS" & vbCrLf & _
         "BEGIN" & vbCrLf & _
         "  MultiUse = -1  'True" & vbCrLf & _
         "End" & vbCrLf & _
-        "Attribute VB_Name = " & Quote & ClassName & Quote & vbCrLf & _
+        "Attribute VB_Name = qq%1qq" & vbCrLf & _
         "Attribute VB_GlobalNameSpace = False" & vbCrLf & _
         "Attribute VB_Creatable = False" & vbCrLf & _
         "Attribute VB_PredeclaredId = False" & vbCrLf & _
@@ -42,7 +42,9 @@ Public Sub ClassBuilder( _
         vbCrLf & _
         "' Built on " & Now() & vbCrLf & _
         "' Built By Briargate Excel Table Builder" & vbCrLf & _
-        "' See BriargateExcel.com for details" & vbCrLf
+        "' See BriargateExcel.com for details" & vbCrLf, _
+        ClassName)
+        
     StreamFile.WriteMessageLine Line, StreamName, "Modules", True
     
     Dim Entry As Variant
@@ -52,20 +54,36 @@ Public Sub ClassBuilder( _
     '
 
     For Each Entry In DetailsDict.Keys
-        Line = "Private p" & DetailsDict.Item(Entry).VariableName & " As " & DetailsDict.Item(Entry).VariableType
+        Line = PrintString( _
+            "Private p%1 As %2", _
+            DetailsDict.Item(Entry).VariableName, DetailsDict.Item(Entry).VariableType)
         StreamFile.WriteMessageLine Line, StreamName
     Next Entry
     StreamFile.WriteBlankMessageLines StreamName
     
-    '
-    ' Added for headcount tool
-    '
-
-    Line = _
-        "Private pEntry As String ' Added for headcount tool" & vbCrLf & _
-        "Private pRecord As iTable ' Added for headcount tool" & vbCrLf
+    Line = PrintString( _
+        "Private p%1Dict As Dictionary" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
+    '
+    ' Declaration separator
+    '
+    
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'   Start of application specific declarations     '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'    End of application specific declarations      '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    StreamFile.WriteMessageLine Line, StreamName
+
     '
     ' Properties
     '
@@ -73,95 +91,117 @@ Public Sub ClassBuilder( _
     For Each Entry In DetailsDict.Keys
         BuildProperties StreamFile, StreamName, DetailsDict.Item(Entry)
     Next Entry
-        
+            
     '
     ' Local Dictionary
     '
-
-    Line = _
+    
+    Line = PrintString( _
         "Public Property Get iTable_LocalDictionary() As Dictionary" & vbCrLf & _
-        "    Set iTable_LocalDictionary = " & TableName & "Dictionary" & vbCrLf & _
-        "End Property" & vbCrLf
+        "    Set iTable_LocalDictionary = %1Dictionary" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' HeaderWidth
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Property Get iTable_HeaderWidth() As Long" & vbCrLf & _
-        "    iTable_HeaderWidth = " & TableName & "HeaderWidth" & vbCrLf & _
-        "End Property" & vbCrLf
+        "    iTable_HeaderWidth = %1HeaderWidth" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' Headers
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Property Get iTable_Headers() As Variant" & vbCrLf & _
-        "    iTable_Headers = " & TableName & "Headers" & vbCrLf & _
-        "End Property" & vbCrLf
+        "    iTable_Headers = %1Headers" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' Get Initialized
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Property Get iTable_Initialized() As Boolean" & vbCrLf & _
-        "    iTable_Initialized = " & TableName & "Initialized" & vbCrLf & _
-        "End Property" & vbCrLf
+        "    iTable_Initialized = %1Initialized" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' Local Table
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
-        "    Set iTable_Localtable = " & TableName & "Table" & vbCrLf & _
-        "End Property" & vbCrLf
+        "    Set iTable_Localtable = %1Table" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        TableName)
+    StreamFile.WriteMessageLine Line, StreamName
+    
+    '
+    ' Local Name
+    '
+
+    Line = PrintString( _
+        "Public Property Get iTable_LocalName() As String" & vbCrLf & _
+        "    iTable_LocalName = qq%1qq" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        ClassName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' Initialize
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Sub iTable_Initialize()" & vbCrLf & _
-        "    " & TableName & "Initialize" & vbCrLf & _
-        "End Sub" & vbCrLf
+        "    %1Initialize" & vbCrLf & _
+        "End Sub" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' TryCopyArrayToDictionary
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean" & vbCrLf & _
-        "    iTable_TryCopyArrayToDictionary = " & TableName & "TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
-        "End Function" & vbCrLf
+        "    iTable_TryCopyArrayToDictionary = %1TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
+        "End Function" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
     ' TryCopyDictionaryToArray
     '
 
-    Line = _
+    Line = PrintString( _
         "Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean" & vbCrLf & _
-        "    iTable_TryCopyDictionaryToArray = " & TableName & "TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
-        "End Function" & vbCrLf
+        "    iTable_TryCopyDictionaryToArray = %1TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
+        "End Function" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
-    ' FormatWorksheet
+    ' FormatArrayAndWorksheet
     '
 
-    Line = _
-        "Public Sub iTable_FormatWorksheet(ByVal Table As ListObject)" & vbCrLf & _
-        "    " & TableName & "FormatWorksheet Table" & vbCrLf & _
-        "End Sub" & vbCrLf
+    Line = PrintString( _
+        "Public Sub iTable_FormatArrayAndWorksheet( _" & vbCrLf & _
+        "    ByRef Ary as Variant, _" & vbCrLf & _
+        "    ByVal Table As ListObject)" & vbCrLf & _
+        "    %1FormatArrayAndWorksheet Ary, Table" & vbCrLf & _
+        "End Sub ' FormatArrayAndWorksheet" & vbCrLf, _
+        TableName)
     StreamFile.WriteMessageLine Line, StreamName
     
     '
@@ -173,71 +213,6 @@ Public Sub ClassBuilder( _
         "'                                                  '" & vbCrLf & _
         "'             End of Generated code                '" & vbCrLf & _
         "'            Start unique code here                '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'          Start of headcount unique code          '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_EmployeeNumber(ByVal Entry As String) As String" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_EmployeeNumber = pRecord.EmployeeNumber" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_Month(ByVal Entry As String) As Date" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_Month = pRecord.Month" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_ControlAccount(ByVal Entry As String) As String" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_ControlAccount = pRecord.ControlAccount" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_ChargeNumber(ByVal Entry As String) As String" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_ChargeNumber = pRecord.ChargeNumber" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_BudEPs(ByVal Entry As String) As Single" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_BudEPs = pRecord.BudEPs" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_EstEPs(ByVal Entry As String) As Single" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_EstEPs = pRecord.EstEPs" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "Public Property Get iTable_ActHrs(ByVal Entry As String) As Single" & vbCrLf & _
-        "    If Entry <> pEntry Then Set pRecord = " & TableName & "Dictionary.Item(Entry)" & vbCrLf & _
-        "    iTable_ActHrs = pRecord.ActHrs" & vbCrLf & _
-        "End Property" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'             End of headcount unique code         '" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     StreamFile.WriteMessageLine Line, StreamName
@@ -266,16 +241,18 @@ Private Sub BuildProperties( _
     
     Dim Line As String
     
-    Line = _
-        "Public Property Get " & Record.VariableName & "() as " & Record.VariableType & vbCrLf & _
-        "    " & Record.VariableName & " = p" & Record.VariableName & vbCrLf & _
-        "End Property" & vbCrLf
+    Line = PrintString( _
+        "Public Property Get %1() as %2" & vbCrLf & _
+        "    %1 = p%1" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        Record.VariableName, Record.VariableType)
     StreamFile.WriteMessageLine Line, StreamName
     
-    Line = _
-        "Public Property Let " & Record.VariableName & "(ByVal Param as " & Record.VariableType & ")" & vbCrLf & _
-        "    p" & Record.VariableName & " = Param" & vbCrLf & _
-        "End Property" & vbCrLf
+    Line = PrintString( _
+        "Public Property Let %1(ByVal Param as %2)" & vbCrLf & _
+        "    p%1 = Param" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        Record.VariableName, Record.VariableType)
     StreamFile.WriteMessageLine Line, StreamName
     
 Done:

@@ -68,7 +68,7 @@ Public Function TryCopyDictionaryToTable( _
     End If
 
     ' Format the worksheet
-    TableType.FormatWorksheet ThisTbl
+    TableType.FormatArrayAndWorksheet Ary, ThisTbl
     
     ' move to DatabodyRange
     Set ThisRng = ThisRng.Offset(1, 0)

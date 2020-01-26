@@ -38,6 +38,10 @@ Option Explicit
 '   Added debug information to the RaiseError calls
 ' 10/25
 '   Converted ConvertDataToTable to a function that returns the table
+' 1/24/20
+'   Added PrintString
+' 1/26/20
+'   Added qq for quote marks to PrintString
 
 Private Const Module_Name As String = "CommonRoutines."
 
@@ -833,4 +837,41 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' CleanToLeftAlignment
 
+Public Function PrintString( _
+    ByVal Text As String, _
+    ParamArray varStrings() As Variant _
+    ) As String
+    
+    ' This routine populates a string based on the parameters provided
+    ' e.g.
+    ' Text = "This is a %1 of the %2 routine
+    ' Call = PrintString Text, "Test", "PrintString"
+    ' Result = "This is a Test of the PrintString routine"
+
+    Const RoutineName As String = Module_Name & "PrintString"
+    On Error GoTo ErrorHandler
+    
+    Text = Replace(Text, "qq", """")
+    Text = Replace(Text, "QQ", """")
+
+    Dim I As Long
+    For I = LBound(varStrings) To UBound(varStrings)
+        If TypeName(varStrings(I)) <> "String" Then
+            Err.Raise 5, "Invalid item passed as token. The string is parameter no [" & CStr(I) & "]." & " PrintString"
+            GoTo Continue
+        End If
+    Text = Replace(Text, "%" & CStr(I + 1), varStrings(I))
+Continue:
+    Next
+    PrintString = Text
+Done:
+    Exit Function
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description, _
+                "Text", Text
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Function ' PrintString
 

@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 1/1/2020 9:32:28 AM
+' Built on 1/26/2020 12:10:13 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -10,11 +10,23 @@ Private Const Module_Name As String = "TableBasics."
 Private pInitialized As Boolean
 Private pTableBasicsDict As Dictionary
 
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 Private Const pTableNameColumn As Long = 1
 Private Const pHeaderWidth As Long = 1
 
-Public Property Get TableBasicsTable() As ListObject
-    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
+Public Property Get TableBasicsTableNameColumn() As Long
+    TableBasicsTableNameColumn = pTableNameColumn
 End Property
 
 Public Property Get TableBasicsDictionary() As Dictionary
@@ -35,7 +47,9 @@ Public Property Get TableBasicsHeaderWidth() As Long
 End Property
 
 Public Property Get TableBasicsHeaders() As Variant
-    TableBasicsHeaders = Array("Table Name")
+    TableBasicsHeaders = Array( _
+        "Table Name", _
+        "Table Name")
 End Property
 
 Public Sub TableBasicsInitialize()
@@ -43,16 +57,14 @@ Public Sub TableBasicsInitialize()
     Const RoutineName As String = Module_Name & "TableBasicsInitialize"
     On Error GoTo ErrorHandler
 
-    pInitialized = True
-
     Dim TableBasics As TableBasics_Table
     Set TableBasics = New TableBasics_Table
 
     Set pTableBasicsDict = New Dictionary
     If Table.TryCopyTableToDictionary(TableBasics, TableBasicsTable, pTableBasicsDict) Then
-        ' Success; do nothing
+        pInitialized = True
     Else
-        MsgBox "Error copying TableBasics table"
+        ReportError "Error copying TableBasics table", "Routine", RoutineName
         pInitialized = False
         GoTo Done
     End If
@@ -82,6 +94,7 @@ Public Function TableBasicsTryCopyDictionaryToArray( _
         TableBasicsTryCopyDictionaryToArray = False
         GoTo Done
     End If
+
     Dim I As Long
     I = 1
 
@@ -94,6 +107,7 @@ Public Function TableBasicsTryCopyDictionaryToArray( _
 
         I = I + 1
     Next Entry
+
 Done:
     Exit Function
 ErrorHandler:
@@ -103,6 +117,20 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableBasicsTryCopyDictionaryToArray
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'         The routines that follow may need        '
+'        changes depending on the application      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Public Property Get TableBasicsTable() As ListObject
+
+    ' Change the table reference if the table is in another workbook
+
+    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
+End Property
 
 Public Function TableBasicsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
@@ -122,10 +150,11 @@ Public Function TableBasicsTryCopyArrayToDictionary( _
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
+            ' May have to change the key to generate unique keys
             Key = Ary(I, pTableNameColumn)
 
             If Dict.Exists(Key) Then
-                MsgBox "Duplicate key"
+                ReportWarning "Duplicate key", "Routine", RoutineName, "Key", Key
                 TableBasicsTryCopyArrayToDictionary = False
                 GoTo Done
             Else
@@ -141,8 +170,6 @@ Public Function TableBasicsTryCopyArrayToDictionary( _
         Dict.Add Ary, Ary
     End If
 
-    '    Array formatting goes here
-
 Done:
     Exit Function
 ErrorHandler:
@@ -153,12 +180,14 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableBasicsTryCopyArrayToDictionary
 
-Public Sub TableBasicsFormatWorksheet(ByVal Table As ListObject)
+Public Sub TableBasicsFormatArrayAndWorksheet( _
+    ByRef Ary As Variant, _
+    ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "TableBasicsFormatWorksheet"
+    Const RoutineName As String = Module_Name & "TableBasicsFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
-    ' Worksheet formatting goes here
+    ' Array and Table formatting goes here
 
 Done:
     Exit Sub
@@ -168,7 +197,7 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableBasicsFormatWorksheet
+End Sub ' TableBasicsFormatArrayAndWorksheet
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '

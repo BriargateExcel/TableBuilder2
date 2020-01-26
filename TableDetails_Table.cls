@@ -10,13 +10,27 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 1/1/2020 9:32:28 AM
+' Built on 1/26/2020 12:10:13 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private pColumnHeader As String
 Private pVariableName As String
 Private pVariableType As String
+
+Private pTableDetailsDict As Dictionary
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Public Property Get ColumnHeader() As String
     ColumnHeader = pColumnHeader
@@ -62,6 +76,10 @@ Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableDetailsTable
 End Property
 
+Public Property Get iTable_LocalName() As String
+    iTable_LocalName = "TableDetails_Table"
+End Property
+
 Public Sub iTable_Initialize()
     TableDetailsInitialize
 End Sub
@@ -74,7 +92,16 @@ Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef 
     iTable_TryCopyDictionaryToArray = TableDetailsTryCopyDictionaryToArray(Dict, Ary)
 End Function
 
-Public Sub iTable_FormatWorksheet(ByVal Table As ListObject)
-    TableDetailsFormatWorksheet Table
-End Sub
+Public Sub iTable_FormatArrayAndWorksheet( _
+    ByRef Ary As Variant, _
+    ByVal Table As ListObject)
+    TableDetailsFormatArrayAndWorksheet Ary, Table
+End Sub ' FormatArrayAndWorksheet
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'             End of Generated code                '
+'            Start unique code here                '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 

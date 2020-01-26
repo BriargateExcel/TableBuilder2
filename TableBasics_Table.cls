@@ -10,11 +10,25 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 1/1/2020 9:32:28 AM
+' Built on 1/26/2020 12:10:13 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private pTableName As String
+
+Private pTableBasicsDict As Dictionary
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Public Property Get TableName() As String
     TableName = pTableName
@@ -44,6 +58,10 @@ Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableBasicsTable
 End Property
 
+Public Property Get iTable_LocalName() As String
+    iTable_LocalName = "TableBasics_Table"
+End Property
+
 Public Sub iTable_Initialize()
     TableBasicsInitialize
 End Sub
@@ -56,7 +74,16 @@ Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef 
     iTable_TryCopyDictionaryToArray = TableBasicsTryCopyDictionaryToArray(Dict, Ary)
 End Function
 
-Public Sub iTable_FormatWorksheet(ByVal Table As ListObject)
-    TableBasicsFormatWorksheet Table
-End Sub
+Public Sub iTable_FormatArrayAndWorksheet( _
+    ByRef Ary As Variant, _
+    ByVal Table As ListObject)
+    TableBasicsFormatArrayAndWorksheet Ary, Table
+End Sub ' FormatArrayAndWorksheet
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'             End of Generated code                '
+'            Start unique code here                '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
