@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 1/26/2020 12:10:13 PM
+' Built on 2/2/2020 11:03:59 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -25,7 +25,9 @@ Private pTableDetailsDict As Dictionary
 Private Const pColumnHeaderColumn As Long = 1
 Private Const pVariableNameColumn As Long = 2
 Private Const pVariableTypeColumn As Long = 3
-Private Const pHeaderWidth As Long = 3
+Private Const pKeyColumn As Long = 4
+Private Const pFormatColumn As Long = 5
+Private Const pHeaderWidth As Long = 5
 
 Public Property Get TableDetailsColumnHeaderColumn() As Long
     TableDetailsColumnHeaderColumn = pColumnHeaderColumn
@@ -37,6 +39,14 @@ End Property
 
 Public Property Get TableDetailsVariableTypeColumn() As Long
     TableDetailsVariableTypeColumn = pVariableTypeColumn
+End Property
+
+Public Property Get TableDetailsKeyColumn() As Long
+    TableDetailsKeyColumn = pKeyColumn
+End Property
+
+Public Property Get TableDetailsFormatColumn() As Long
+    TableDetailsFormatColumn = pFormatColumn
 End Property
 
 Public Property Get TableDetailsDictionary() As Dictionary
@@ -60,7 +70,9 @@ Public Property Get TableDetailsHeaders() As Variant
     TableDetailsHeaders = Array( _
         "Column Header", _
         "Variable Name", _
-        "Type")
+        "Type", _
+        "Key", _
+        "Format")
 End Property
 
 Public Sub TableDetailsInitialize()
@@ -117,6 +129,8 @@ Public Function TableDetailsTryCopyDictionaryToArray( _
         Ary(I, pColumnHeaderColumn) = Record.ColumnHeader
         Ary(I, pVariableNameColumn) = Record.VariableName
         Ary(I, pVariableTypeColumn) = Record.VariableType
+        Ary(I, pKeyColumn) = Record.Key
+        Ary(I, pFormatColumn) = Record.Format
 
         I = I + 1
     Next Entry
@@ -131,19 +145,29 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyDictionaryToArray
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'         The routines that follow may need        '
-'        changes depending on the application      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+Public Function CheckColumnHeaderExists(ByVal ColumnHeader As String) As Boolean _
 
-Public Property Get TableDetailsTable() As ListObject
+    Const RoutineName As String = Module_Name & "CheckColumnHeaderExists"
+    On Error GoTo ErrorHandler
 
-    ' Change the table reference if the table is in another workbook
+    If Not pInitialized Then TableDetailsInitialize
 
-    Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
-End Property
+    If ColumnHeader = vbNullString Then
+        CheckColumnHeaderExists = True
+        Exit Function
+    End If
+
+    CheckColumnHeaderExists = pTableDetailsDict.Exists(ColumnHeader)
+
+Done:
+    Exit Function
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Function ' CheckColumnHeaderExists
 
 Public Function TableDetailsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
@@ -163,7 +187,6 @@ Public Function TableDetailsTryCopyArrayToDictionary( _
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
-            ' May have to change the key to generate unique keys
             Key = Ary(I, pColumnHeaderColumn)
 
             If Dict.Exists(Key) Then
@@ -176,6 +199,8 @@ Public Function TableDetailsTryCopyArrayToDictionary( _
                 Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
                 Record.VariableName = Ary(I, pVariableNameColumn)
                 Record.VariableType = Ary(I, pVariableTypeColumn)
+                Record.Key = Ary(I, pKeyColumn)
+                Record.Format = Ary(I, pFormatColumn)
 
                 Dict.Add Key, Record
             End If
@@ -194,6 +219,20 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyArrayToDictionary
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'         The routines that follow may need        '
+'        changes depending on the application      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Public Property Get TableDetailsTable() As ListObject
+
+    ' Change the table reference if the table is in another workbook
+
+    Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
+End Property
 
 Public Sub TableDetailsFormatArrayAndWorksheet( _
     ByRef Ary As Variant, _

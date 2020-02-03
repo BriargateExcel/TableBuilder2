@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 1/26/2020 12:10:13 PM
+' Built on 2/2/2020 10:28:50 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -150,8 +150,7 @@ Public Function TableBasicsTryCopyArrayToDictionary( _
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
-            ' May have to change the key to generate unique keys
-            Key = Ary(I, pTableNameColumn)
+            Key = Ary(I, 1)
 
             If Dict.Exists(Key) Then
                 ReportWarning "Duplicate key", "Routine", RoutineName, "Key", Key

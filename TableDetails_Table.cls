@@ -10,13 +10,15 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 1/26/2020 12:10:13 PM
+' Built on 2/2/2020 11:03:59 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private pColumnHeader As String
 Private pVariableName As String
 Private pVariableType As String
+Private pKey As String
+Private pFormat As String
 
 Private pTableDetailsDict As Dictionary
 
@@ -54,6 +56,22 @@ End Property
 
 Public Property Let VariableType(ByVal Param As String)
     pVariableType = Param
+End Property
+
+Public Property Get Key() As String
+    Key = pKey
+End Property
+
+Public Property Let Key(ByVal Param As String)
+    pKey = Param
+End Property
+
+Public Property Get Format() As String
+    Format = pFormat
+End Property
+
+Public Property Let Format(ByVal Param As String)
+    pFormat = Param
 End Property
 
 Public Property Get iTable_LocalDictionary() As Dictionary

@@ -18,8 +18,8 @@ Public Sub ClassBuilder( _
     Dim StreamName As String
     StreamName = ClassName & ".cls"
     
-    Dim StreamFile As MessageFileClass
-    Set StreamFile = New MessageFileClass
+    Dim Streamfile As MessageFileClass
+    Set Streamfile = New MessageFileClass
     
     Dim Line As String
     
@@ -45,7 +45,7 @@ Public Sub ClassBuilder( _
         "' See BriargateExcel.com for details" & vbCrLf, _
         ClassName)
         
-    StreamFile.WriteMessageLine Line, StreamName, "Modules", True
+    Streamfile.WriteMessageLine Line, StreamName, "Modules", True
     
     Dim Entry As Variant
     
@@ -57,14 +57,14 @@ Public Sub ClassBuilder( _
         Line = PrintString( _
             "Private p%1 As %2", _
             DetailsDict.Item(Entry).VariableName, DetailsDict.Item(Entry).VariableType)
-        StreamFile.WriteMessageLine Line, StreamName
+        Streamfile.WriteMessageLine Line, StreamName
     Next Entry
-    StreamFile.WriteBlankMessageLines StreamName
+    Streamfile.WriteBlankMessageLines StreamName
     
     Line = PrintString( _
         "Private p%1Dict As Dictionary" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Declaration separator
@@ -82,14 +82,14 @@ Public Sub ClassBuilder( _
         "'    End of application specific declarations      '" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
 
     '
     ' Properties
     '
 
     For Each Entry In DetailsDict.Keys
-        BuildProperties StreamFile, StreamName, DetailsDict.Item(Entry)
+        BuildProperties Streamfile, StreamName, DetailsDict.Item(Entry)
     Next Entry
             
     '
@@ -101,7 +101,7 @@ Public Sub ClassBuilder( _
         "    Set iTable_LocalDictionary = %1Dictionary" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' HeaderWidth
@@ -112,7 +112,7 @@ Public Sub ClassBuilder( _
         "    iTable_HeaderWidth = %1HeaderWidth" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Headers
@@ -123,7 +123,7 @@ Public Sub ClassBuilder( _
         "    iTable_Headers = %1Headers" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Get Initialized
@@ -134,7 +134,7 @@ Public Sub ClassBuilder( _
         "    iTable_Initialized = %1Initialized" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Local Table
@@ -145,7 +145,7 @@ Public Sub ClassBuilder( _
         "    Set iTable_Localtable = %1Table" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Local Name
@@ -156,7 +156,7 @@ Public Sub ClassBuilder( _
         "    iTable_LocalName = qq%1qq" & vbCrLf & _
         "End Property" & vbCrLf, _
         ClassName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' Initialize
@@ -167,7 +167,7 @@ Public Sub ClassBuilder( _
         "    %1Initialize" & vbCrLf & _
         "End Sub" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' TryCopyArrayToDictionary
@@ -178,7 +178,7 @@ Public Sub ClassBuilder( _
         "    iTable_TryCopyArrayToDictionary = %1TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
         "End Function" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' TryCopyDictionaryToArray
@@ -189,7 +189,7 @@ Public Sub ClassBuilder( _
         "    iTable_TryCopyDictionaryToArray = %1TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
         "End Function" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' FormatArrayAndWorksheet
@@ -202,7 +202,7 @@ Public Sub ClassBuilder( _
         "    %1FormatArrayAndWorksheet Ary, Table" & vbCrLf & _
         "End Sub ' FormatArrayAndWorksheet" & vbCrLf, _
         TableName)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     '
     ' End of generated code comment
@@ -215,9 +215,9 @@ Public Sub ClassBuilder( _
         "'            Start unique code here                '" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
-    Set StreamFile = Nothing
+    Set Streamfile = Nothing
 
 Done:
     Exit Sub
@@ -230,7 +230,7 @@ ErrorHandler:
 End Sub ' ClassBuilder
 
 Private Sub BuildProperties( _
-        ByVal StreamFile As MessageFileClass, _
+        ByVal Streamfile As MessageFileClass, _
         ByVal StreamName As String, _
         ByVal Record As TableDetails_Table)
 
@@ -246,14 +246,14 @@ Private Sub BuildProperties( _
         "    %1 = p%1" & vbCrLf & _
         "End Property" & vbCrLf, _
         Record.VariableName, Record.VariableType)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
     Line = PrintString( _
         "Public Property Let %1(ByVal Param as %2)" & vbCrLf & _
         "    p%1 = Param" & vbCrLf & _
         "End Property" & vbCrLf, _
         Record.VariableName, Record.VariableType)
-    StreamFile.WriteMessageLine Line, StreamName
+    Streamfile.WriteMessageLine Line, StreamName
     
 Done:
     Exit Sub
