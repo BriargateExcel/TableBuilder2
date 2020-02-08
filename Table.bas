@@ -26,6 +26,10 @@ Public Function TryCopyDictionaryToTable( _
         If Not TableType.Initialized Then TableType.Initialize
         Set ThisDict = TableType.LocalDictionary
     Else
+        If Dict.Count = 0 Then
+            TryCopyDictionaryToTable = False
+            GoTo Done
+        End If
         Set ThisDict = Dict
     End If
 
@@ -55,6 +59,8 @@ Public Function TryCopyDictionaryToTable( _
     Set ThisRng = ThisTbl.Parent.Range(AddressPieces(0))
 
     ThisRng.Resize(1, TableType.HeaderWidth) = TableType.Headers
+    
+    ClearTable ThisTbl
 
     Dim Ary As Variant
     ReDim Ary(1 To ThisDict.Count, 1 To TableType.HeaderWidth)
@@ -66,7 +72,7 @@ Public Function TryCopyDictionaryToTable( _
         TryCopyDictionaryToTable = False
         GoTo Done
     End If
-
+    
     ' Format the worksheet
     TableType.FormatArrayAndWorksheet Ary, ThisTbl
     
@@ -110,7 +116,7 @@ Public Function TryCopyTableToDictionary( _
     On Error Resume Next
     Ary = Tbl.DataBodyRange
     If Err.Number <> 0 Then
-        ReportError "The table is empty", "Routine", RoutineName
+        ReportError "The " & TableType.LocalName & " table is empty", "Routine", RoutineName
         TryCopyTableToDictionary = False
         GoTo Done
     End If

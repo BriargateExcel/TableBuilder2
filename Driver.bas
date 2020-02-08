@@ -3,7 +3,7 @@ Option Explicit
 
 Private Const Module_Name As String = "Driver."
 
-Public Sub Main()
+Public Sub BuildModules()
     
     Const RoutineName As String = Module_Name & "Main"
     On Error GoTo ErrorHandler

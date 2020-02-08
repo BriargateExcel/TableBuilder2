@@ -14,11 +14,13 @@ Option Explicit
 '   Added ReportWarning
 '   Changed module name to Error_WarningRoutines
 '   Deleted reference to CloseErrorFile
+' 10/29/19
+'   Added ability get message folder path
 
 ' This module provides the error handling routines
 ' See the example usage at the end of the module
 
-Private Const Module_Name As String = "Error_WarningRoutines."
+Private Const Module_Name As String = "ErrorRoutines."
 
 Private pErrorFile As MessageFileClass
 Private Const pErrorStreamName As String = "Error Messages"
@@ -28,7 +30,11 @@ Private Const pWarningStreamName As String = "Warning Messages"
 
 Private SourceOfError As String
 
-Public Function ReportWarning( _
+Public Property Get WarningMessageFolderPath()
+    WarningMessageFolderPath = pWarningFile.MessageFolderPath
+End Property
+
+Public Sub ReportWarning( _
        ByVal WarningMsg As String, _
        ParamArray Args() As Variant)
 
@@ -52,19 +58,19 @@ Public Function ReportWarning( _
     pWarningFile.WriteMessageLine WarningMessage, pWarningStreamName
     
 Done:
-    Exit Function
+    Exit Sub
 ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' ReportWarning
+End Sub      ' ReportWarning
 
 Public Property Get ErrorsFound() As Boolean
     ErrorsFound = Not pErrorFile Is Nothing
 End Property
 
-Public Function RaiseError( _
+Public Sub RaiseError( _
        ByVal ErrorNo As Long, _
        ByVal Src As String, _
-       ByVal Proc As String, _
+       ByVal proc As String, _
        ByVal Desc As String, _
        ParamArray Args() As Variant)
 
@@ -74,50 +80,41 @@ Public Function RaiseError( _
     ' One name and value per line
 
     ' Add procedure to source
-    SourceOfError = SourceOfError & vbCrLf & Proc
+    SourceOfError = SourceOfError & vbCrLf & proc
     ReportError SourceOfError
     
     ' Check if procedure where error occurs has line numbers
     ' Add error line number if present
-    '    If Erl <> 0 Then
-    '        SourceOfError = vbCrLf & "Line no: " & Erl
-    '    End If
-    '
-    '    Dim I As Long
-    '    For I = 1 To IIf(UBound(Args, 1) Mod 2 = 2, UBound(Args, 1), UBound(Args, 1) - 1) Step 2
-    '        SourceOfError = SourceOfError & Args(I) & " = " & Args(I + 1) & vbCrLf
-    '    Next I
+'    If Erl <> 0 Then
+'        SourceOfError = vbCrLf & "Line no: " & Erl
+'    End If
+'
+'    Dim I As Long
+'    For I = 1 To IIf(UBound(Args, 1) Mod 2 = 2, UBound(Args, 1), UBound(Args, 1) - 1) Step 2
+'        SourceOfError = SourceOfError & Args(I) & " = " & Args(I + 1) & vbCrLf
+'    Next I
 
     ' If the code stops here,
     ' make sure DisplayError is placed in the top most Sub
     Err.Raise ErrorNo, SourceOfError, Desc
 
-End Function ' RaiseError
+End Sub      ' RaiseError
 
-Public Function DisplayError(ByVal ProcName As String)
+Public Sub DisplayError(ByVal ProcName As String)
 
     ' Writes the error to the error file when it reaches the topmost sub
 
     Dim Msg As String
-    Dim ErrorNumber As Long
-    On Error Resume Next
     Msg = "The following exception was raised: " & vbCrLf & _
           "Description: " & Err.Description & vbCrLf & _
           "VBA Project: " & ThisWorkbook.VBProject.Name & vbCrLf & _
           SourceOfError & vbCrLf & ProcName
-    ErrorNumber = Err.Number
-    On Error GoTo 0
-    If ErrorNumber <> 0 Then
-    Msg = "The following exception was raised: " & vbCrLf & _
-          "Description: " & Err.Description & vbCrLf & _
-          SourceOfError & vbCrLf & ProcName
-    End If
 
     ReportError Msg
     
-End Function ' DisplayError
+End Sub      ' DisplayError
 
-Public Function ReportError( _
+Public Sub ReportError( _
        ByVal ErrMsg As String, _
        ParamArray Args() As Variant)
 
@@ -141,68 +138,17 @@ Public Function ReportError( _
     pErrorFile.WriteMessageLine ErrorMessage, pErrorStreamName
     
 Done:
-    Exit Function
+    Exit Sub
 ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' ReportError
+End Sub      ' ReportError
 
-Public Function CloseErrorFile() As Boolean
+Public Sub CloseErrorFile()
     ' Declared as a function to keep it of the Alt-F8 list of executable routines
 
     Set pErrorFile = Nothing
     Set pWarningFile = Nothing
     SourceOfError = vbNullString
 
-End Function ' CloseErrorFile
-
-'Private Sub SubErrorRaiseProcess(ByVal Parameter As String)
-'
-'    ' This routine tests the error raise process
-'
-'    Const RoutineName As String = Module_Name & "SubErrorRaiseProcess"
-'    On Error GoTo ErrorHandler
-'
-'    ReportError "Error Message", _
-'        "Parameter", Parameter, _
-'        "Param 1", 1, _
-'        "Param 2", 2
-'
-'    Dim Test As Long
-'    Test = 1 / 0
-'
-'Done:
-'    Exit Sub
-'ErrorHandler:
-'    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-'End Sub ' SubErrorRaiseProcess
-'
-'Public Sub TestErrorRaiseProcess()
-'
-'    ' This routine tests the error raise process
-'
-'    Const RoutineName As String = Module_Name & "TestErrorRaiseProcess"
-'    On Error GoTo ErrorHandler
-'
-'    SubErrorRaiseProcess "First"
-'    SubErrorRaiseProcess "Second"
-'
-'    CloseErrorFile
-'
-'Done:
-'    CloseErrorFile
-'    Exit Sub
-'ErrorHandler:
-'    DisplayError RoutineName
-'    CloseErrorFile
-'End Sub ' TestErrorRaiseProcess
-
-
-
-
-
-
-
-
-
-
+End Sub      ' CloseErrorFile
 

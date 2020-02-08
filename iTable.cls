@@ -38,3 +38,6 @@ Public Sub FormatArrayAndWorksheet( _
     ByVal Table As ListObject)
 End Sub
 
+Public Property Get LocalName() As String
+End Property
+

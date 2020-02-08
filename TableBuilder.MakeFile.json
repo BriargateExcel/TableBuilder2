@@ -1,6 +1,6 @@
 {
 	"VBAProject Name": "TableBuilder",
-	"Base Path": "C:\\Users\\DickDye\\Documents\\Excel\\TableManager\\src",
+	"Base Path": "C:\\Users\\DickDye\\Documents\\Excel\\TableBuilder\\TableBuilderSource",
 	"Module Paths": {
 		"TableDetails_Table": "TableDetails_Table.cls",
 		"TableBasics_Table": "TableBasics_Table.cls",

@@ -62,7 +62,7 @@ Public Sub ModuleBuilder( _
     BuildConstantsAndProperties Streamfile, StreamName, DetailsDict, TableName
 
     '
-    ' Get Dictionary
+    ' Property Get Dictionary
     '
     Line = PrintString( _
         "Public Property Get %1Dictionary() As Dictionary" & vbCrLf & _
@@ -72,7 +72,7 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     '
-    ' Get Initialized
+    ' Property Get Initialized
     '
     
     Line = PrintString( _
@@ -83,7 +83,7 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     '
-    ' Reset
+    ' Sub Reset
     '
     
     Line = PrintString( _
@@ -95,7 +95,7 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     '
-    ' HeaderWidth
+    ' Property Get HeaderWidth
     '
     
     Line = PrintString( _
@@ -106,13 +106,13 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     '
-    ' Headers
+    ' Constants for table columns
     '
     
-    BuildHeaders Streamfile, StreamName, DetailsDict, TableName
+    BuildColumnConstants Streamfile, StreamName, DetailsDict, TableName
 
     '
-    ' Initialize
+    ' Sub Initialize
     '
     
     Line = PrintString( _
@@ -138,10 +138,10 @@ Public Sub ModuleBuilder( _
         TableName, ClassName)
      Streamfile.WriteMessageLine Line, StreamName
 
-    SubEnding TableName, Streamfile, StreamName, TableName & "Initialize"
+    SubEnding Streamfile, StreamName, TableName & "Initialize"
 
     '
-    ' TryCopyDictionaryToArray
+    ' Function TryCopyDictionaryToArray
     '
     
     Line = PrintString( _
@@ -168,7 +168,7 @@ Public Sub ModuleBuilder( _
     RecordToArray Streamfile, StreamName, DetailsDict, ClassName, TableName
     
     '
-    ' CheckExists
+    ' Function CheckExists
     '
     
     BuildCheckExists DetailsDict, TableName, Streamfile, StreamName
@@ -195,10 +195,10 @@ Public Sub ModuleBuilder( _
 
     ArrayToRecord Streamfile, StreamName, DetailsDict, ClassName, TableName
 
-    FunctionEnding TableName, Streamfile, StreamName, TableName & "TryCopyArrayToDictionary"
+    FunctionEnding Streamfile, StreamName, TableName & "TryCopyArrayToDictionary"
     
     '
-    ' FormatArrayAndWorksheet
+    ' Sub FormatArrayAndWorksheet
     '
     
     Line = PrintString( _
@@ -211,12 +211,18 @@ Public Sub ModuleBuilder( _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
     
-    FormatDetails TableName, DetailsDict, Streamfile, StreamName
+    FormatDetails DetailsDict, Streamfile, StreamName
 
-    SubEnding TableName, Streamfile, StreamName, TableName & "FormatArrayAndWorksheet"
+    SubEnding Streamfile, StreamName, TableName & "FormatArrayAndWorksheet"
     
     '
-    ' Separator
+    ' Sub Property Get Routines
+    '
+    
+    BuildPropertyGetRoutines Streamfile, StreamName, DetailsDict, TableName
+    
+    '
+    ' Separator for routines potentially needing changes
     '
     
     Line = _
@@ -229,7 +235,7 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     '
-    ' Get Table
+    ' Property Get Table
     '
     
     Line = PrintString( _
@@ -355,7 +361,7 @@ Private Sub RecordToArray( _
     Line = "    Next Entry" & vbCrLf
     Streamfile.WriteMessageLine Line, StreamName
     
-    FunctionEnding TableName, Streamfile, StreamName, TableName & "TryCopyDictionaryToArray"
+    FunctionEnding Streamfile, StreamName, TableName & "TryCopyDictionaryToArray"
 
 Done:
     Exit Sub
@@ -367,15 +373,15 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' RecordToArray
 
-Private Sub BuildHeaders( _
+Private Sub BuildColumnConstants( _
         ByVal Streamfile As MessageFileClass, _
         ByVal StreamName As String, _
         ByVal DetailsDict As Dictionary, _
         ByVal TableName As String)
 
-    ' This routine builds the Headers property
+    ' This routine builds the constants defining the table columns
     
-    Const RoutineName As String = Module_Name & "BuildHeaders"
+    Const RoutineName As String = Module_Name & "BuildColumnConstants"
     On Error GoTo ErrorHandler
     
     Dim Line As String
@@ -413,79 +419,7 @@ ErrorHandler:
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' BuildHeaders
-
-Private Sub SubEnding( _
-    ByVal TableName As String, _
-    ByVal Streamfile As MessageFileClass, _
-    ByVal StreamName As String, _
-    ByVal SubName As String)
-
-    ' The standard end for subs
-    
-    Const RoutineName As String = Module_Name & "SubEnding"
-    On Error GoTo ErrorHandler
-    
-    Dim Line As String
-    
-    Line = PrintString( _
-        "Done:" & vbCrLf & _
-        "    Exit Sub" & vbCrLf & _
-        "ErrorHandler:" & vbCrLf & _
-        "    ReportError qqException raisedqq, _" & vbCrLf & _
-        "                qqRoutineqq, RoutineName, _" & vbCrLf & _
-        "                qqError Numberqq, Err.Number, _" & vbCrLf & _
-        "                qqError Descriptionqq, Err.Description" & vbCrLf & _
-        "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
-        "End Sub ' %2" & vbCrLf, _
-        TableName, SubName)
-    Streamfile.WriteMessageLine Line, StreamName
-    
-Done:
-    Exit Sub
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' SubEnding
-
-Private Sub FunctionEnding( _
-    ByVal TableName As String, _
-    ByVal Streamfile As MessageFileClass, _
-    ByVal StreamName As String, _
-    ByVal FunctionName As String)
-
-    ' The standard end for functions
-    
-    Const RoutineName As String = Module_Name & "FunctionEnding"
-    On Error GoTo ErrorHandler
-    
-    Dim Line As String
-    
-    Line = PrintString( _
-        "Done:" & vbCrLf & _
-        "    Exit Function" & vbCrLf & _
-        "ErrorHandler:" & vbCrLf & _
-        "    ReportError qqException raisedqq, _" & vbCrLf & _
-        "                qqRoutineqq, RoutineName, _" & vbCrLf & _
-        "                qqError Numberqq, Err.Number, _" & vbCrLf & _
-        "                qqError Descriptionqq, Err.Description" & vbCrLf & _
-        "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
-        "End Function ' %2" & vbCrLf, _
-        TableName, FunctionName)
-    Streamfile.WriteMessageLine Line, StreamName
-    
-Done:
-    Exit Sub
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' FunctionEnding
+End Sub ' BuildColumnConstants
 
 Private Sub BuildCheckExists( _
     ByVal Dict As Dictionary, _
@@ -504,7 +438,7 @@ Private Sub BuildCheckExists( _
     Dim Key As String
     For Each Entry In Dict
         Set TD = Dict(Entry)
-        If TD.Key = "Key" Or TD.Key = "Key1" Then
+        If TD.Key = "Key" Then
             Key = TD.VariableName
             Found = True
             Exit For
@@ -535,7 +469,7 @@ Private Sub BuildCheckExists( _
         Key, TableName)
     Streamfile.WriteMessageLine Line, StreamName
 
-    FunctionEnding TableName, Streamfile, StreamName, "Check" & Key & "Exists"
+    FunctionEnding Streamfile, StreamName, "Check" & Key & "Exists"
     
 Done:
     Exit Sub
@@ -722,14 +656,14 @@ Private Sub BuildMoreThanOneKey( _
         ClassName)
     Streamfile.WriteMessageLine Line, StreamName
     
-    Line = PrintString("            Key = qq|qq & _", Ary(1))
+    Line = PrintString("            Key = qq|qq _", Ary(1))
         
     Dim I As Long
     For I = 1 To UBound(Ary, 1) - 1
-        Line = Line & PrintString(vbCrLf & "                & Ary(I, %1Column) & qq|qq & _", Ary(I))
+        Line = Line & PrintString(vbCrLf & "                & Ary(I, p%1Column) & qq|qq _", Ary(I))
     Next I
     
-    Line = Line & PrintString(vbCrLf & "                & Ary(I, %1Column) & qq|qq" & vbCrLf, Ary(UBound(Ary, 1)))
+    Line = Line & PrintString(vbCrLf & "                & Ary(I, p%1Column) & qq|qq" & vbCrLf, Ary(UBound(Ary, 1)))
     Streamfile.WriteMessageLine Line, StreamName
     
     Line = PrintString( _
@@ -753,7 +687,6 @@ ErrorHandler:
 End Sub ' BuildMoreThanOneKey
 
 Private Sub FormatDetails( _
-    ByVal TableName As String, _
     ByVal DetailsDict As Dictionary, _
     ByVal Streamfile As MessageFileClass, _
     ByVal StreamName As String)
@@ -764,10 +697,32 @@ Private Sub FormatDetails( _
     On Error GoTo ErrorHandler
     
     Dim Line As String
-    Line = PrintString( _
-        "' Formats for %1 go here" & vbCrLf, _
-        TableName)
-    Streamfile.WriteMessageLine Line, StreamName
+    Dim Entry As Variant
+    Dim TD As TableDetails_Table
+    Dim Vbl As String
+    For Each Entry In DetailsDict
+        Set TD = DetailsDict(Entry)
+        Vbl = TD.VariableName
+        
+        Select Case TD.Format
+        Case "CLIN"
+            Line = PrintString("    CleanCLINData Table, p%1Column", Vbl)
+        Case "Dollar"
+            Line = PrintString("    CleanDollars Table, p%1Column", Vbl)
+        Case "EmpNum"
+            Line = PrintString("    CleanEmployeeData Ary, Table, p%1Column", Vbl)
+        Case "Month"
+            Line = PrintString("    CleanMonthData Table, p%1Column", Vbl)
+        Case "TwoDecimal"
+            Line = PrintString("    CleanTwoDecimalData Table, p%1Column", Vbl)
+        Case "Week"
+            Line = PrintString("    CleanWeekData Table, p%1Column", Vbl)
+        End Select
+        
+        If TD.Format <> vbNullString Then Streamfile.WriteMessageLine Line, StreamName
+    Next Entry
+    
+    Streamfile.WriteBlankMessageLines StreamName
     
 Done:
     Exit Sub
@@ -778,4 +733,199 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' FormatDetails
+
+Private Sub BuildPropertyGetRoutines( _
+        ByVal Streamfile As MessageFileClass, _
+        ByVal StreamName As String, _
+        ByVal DetailsDict As Dictionary, _
+        ByVal TableName As String)
+
+    ' Build the Property Get routines
+    
+    Const RoutineName As String = Module_Name & "BuildPropertyGetRoutines"
+    On Error GoTo ErrorHandler
+    
+    Dim Entry As Variant
+    Dim FoundAKey As Boolean
+    Dim Details As TableDetails_Table
+    Dim Key As String
+    Dim KeyType As String
+    For Each Entry In DetailsDict
+        Set Details = DetailsDict(Entry)
+        If Details.Key = "Key" Then
+            Key = Details.VariableName
+            KeyType = Details.VariableType
+            FoundAKey = True
+            Exit For
+        End If
+    Next Entry
+    
+    If Not FoundAKey Then GoTo Done
+    
+    Dim Target As String ' The variable name to be fetched
+    Dim TargetType As String
+    For Each Entry In DetailsDict
+        Set Details = DetailsDict(Entry)
+        If Details.VariableName <> Key Then
+            Target = Details.VariableName
+            TargetType = Details.VariableType
+            BuildOnePropertyGetRoutine Streamfile, StreamName, Key, KeyType, Target, TargetType, TableName
+        End If
+    Next Entry
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' BuildPropertyGetRoutines
+
+Private Sub BuildOnePropertyGetRoutine( _
+        ByVal Streamfile As MessageFileClass, _
+        ByVal StreamName As String, _
+        ByVal Key As String, _
+        ByVal KeyType As String, _
+        ByVal Target As String, _
+        ByVal TargetType As String, _
+        TableName As String)
+
+    ' Build one Property Get routine
+    
+    Const RoutineName As String = Module_Name & "BuildOnePropertyGetRoutine"
+    On Error GoTo ErrorHandler
+    
+    Dim Line As String
+    Line = PrintString( _
+        "Public Property Get Get%1From%2(ByVal %2 As %3) As %4" & vbCrLf & _
+        vbCrLf & _
+        "    Const RoutineName As String = Module_Name & qqGet%1From%2qq" & vbCrLf & _
+        "    On Error GoTo ErrorHandler" & vbCrLf & _
+        vbCrLf & _
+        "    If Not pInitialized Then %5Initialize" & vbCrLf & _
+        vbCrLf & _
+        "    If Check%2Exists(%2) Then" & vbCrLf & _
+        "        Get%1From%2 = p%5Dict(%2).%1" & vbCrLf & _
+        "    Else" & vbCrLf & _
+        "        ReportError qqUnrecognized %2qq, qqRoutineqq, RoutineName" & vbCrLf & _
+        "    End If" & vbCrLf, _
+        Target, Key, KeyType, TargetType, TableName)
+        
+    Streamfile.WriteMessageLine Line, StreamName
+    
+    PropertyEnding Streamfile, StreamName, PrintString("Get%1From%2", Target, Key)
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' BuildOnePropertyGetRoutine
+
+Private Sub SubEnding( _
+    ByVal Streamfile As MessageFileClass, _
+    ByVal StreamName As String, _
+    ByVal SubName As String)
+
+    ' The standard end for subs
+    
+    Const RoutineName As String = Module_Name & "SubEnding"
+    On Error GoTo ErrorHandler
+    
+    RoutineEnding Streamfile, StreamName, SubName, "Sub"
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' SubEnding
+
+Private Sub FunctionEnding( _
+    ByVal Streamfile As MessageFileClass, _
+    ByVal StreamName As String, _
+    ByVal FunctionName As String)
+
+    ' The standard end for functions
+    
+    Const RoutineName As String = Module_Name & "FunctionEnding"
+    On Error GoTo ErrorHandler
+    
+    RoutineEnding Streamfile, StreamName, FunctionName, "Function"
+
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' FunctionEnding
+
+Private Sub PropertyEnding( _
+    ByVal Streamfile As MessageFileClass, _
+    ByVal StreamName As String, _
+    ByVal SubName As String)
+
+    ' The standard end for Property
+    
+    Const RoutineName As String = Module_Name & "PropertyEnding"
+    On Error GoTo ErrorHandler
+    
+    RoutineEnding Streamfile, StreamName, SubName, "Property"
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' PropertyEnding
+
+Private Sub RoutineEnding( _
+    ByVal Streamfile As MessageFileClass, _
+    ByVal StreamName As String, _
+    ByVal SubName As String, _
+    ByVal RoutineType As String)
+
+    ' Creates a standard routine ending
+    
+    Const RoutineName As String = Module_Name & "RoutineEnding"
+    On Error GoTo ErrorHandler
+    
+    Dim Line As String
+    
+    Line = PrintString( _
+        "Done:" & vbCrLf & _
+        "    Exit %1" & vbCrLf & _
+        "ErrorHandler:" & vbCrLf & _
+        "    ReportError qqException raisedqq, _" & vbCrLf & _
+        "                qqRoutineqq, RoutineName, _" & vbCrLf & _
+        "                qqError Numberqq, Err.Number, _" & vbCrLf & _
+        "                qqError Descriptionqq, Err.Description" & vbCrLf & _
+        "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
+        "End %1 ' %2" & vbCrLf, _
+        RoutineType, SubName)
+    Streamfile.WriteMessageLine Line, StreamName
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' RoutineEnding
 
