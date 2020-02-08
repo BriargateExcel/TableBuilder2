@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 2/2/2020 11:03:59 AM
+' Built on 2/8/2020 11:26:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -220,6 +220,116 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyArrayToDictionary
 
+Public Sub TableDetailsFormatArrayAndWorksheet( _
+    ByRef Ary As Variant, _
+    ByVal Table As ListObject)
+
+    Const RoutineName As String = Module_Name & "TableDetailsFormatArrayAndWorksheet"
+    On Error GoTo ErrorHandler
+
+
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' TableDetailsFormatArrayAndWorksheet
+
+Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String) As String
+
+    Const RoutineName As String = Module_Name & "GetVariableNameFromColumnHeader"
+    On Error GoTo ErrorHandler
+
+    If Not pInitialized Then TableDetailsInitialize
+
+    If CheckColumnHeaderExists(ColumnHeader) Then
+        GetVariableNameFromColumnHeader = pTableDetailsDict(ColumnHeader).VariableName
+    Else
+        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+    End If
+
+Done:
+    Exit Property
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Property ' GetVariableNameFromColumnHeader
+
+Public Property Get GetVariableTypeFromColumnHeader(ByVal ColumnHeader As String) As String
+
+    Const RoutineName As String = Module_Name & "GetVariableTypeFromColumnHeader"
+    On Error GoTo ErrorHandler
+
+    If Not pInitialized Then TableDetailsInitialize
+
+    If CheckColumnHeaderExists(ColumnHeader) Then
+        GetVariableTypeFromColumnHeader = pTableDetailsDict(ColumnHeader).VariableType
+    Else
+        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+    End If
+
+Done:
+    Exit Property
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Property ' GetVariableTypeFromColumnHeader
+
+Public Property Get GetKeyFromColumnHeader(ByVal ColumnHeader As String) As String
+
+    Const RoutineName As String = Module_Name & "GetKeyFromColumnHeader"
+    On Error GoTo ErrorHandler
+
+    If Not pInitialized Then TableDetailsInitialize
+
+    If CheckColumnHeaderExists(ColumnHeader) Then
+        GetKeyFromColumnHeader = pTableDetailsDict(ColumnHeader).Key
+    Else
+        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+    End If
+
+Done:
+    Exit Property
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Property ' GetKeyFromColumnHeader
+
+Public Property Get GetFormatFromColumnHeader(ByVal ColumnHeader As String) As String
+
+    Const RoutineName As String = Module_Name & "GetFormatFromColumnHeader"
+    On Error GoTo ErrorHandler
+
+    If Not pInitialized Then TableDetailsInitialize
+
+    If CheckColumnHeaderExists(ColumnHeader) Then
+        GetFormatFromColumnHeader = pTableDetailsDict(ColumnHeader).Format
+    Else
+        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+    End If
+
+Done:
+    Exit Property
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Property ' GetFormatFromColumnHeader
+
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
 '         The routines that follow may need        '
@@ -233,25 +343,6 @@ Public Property Get TableDetailsTable() As ListObject
 
     Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
 End Property
-
-Public Sub TableDetailsFormatArrayAndWorksheet( _
-    ByRef Ary As Variant, _
-    ByVal Table As ListObject)
-
-    Const RoutineName As String = Module_Name & "TableDetailsFormatArrayAndWorksheet"
-    On Error GoTo ErrorHandler
-
-    ' Array and Table formatting goes here
-
-Done:
-    Exit Sub
-ErrorHandler:
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableDetailsFormatArrayAndWorksheet
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '

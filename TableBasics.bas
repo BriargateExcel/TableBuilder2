@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 2/2/2020 10:28:50 AM
+' Built on 2/8/2020 11:26:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -118,20 +118,6 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableBasicsTryCopyDictionaryToArray
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'         The routines that follow may need        '
-'        changes depending on the application      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-Public Property Get TableBasicsTable() As ListObject
-
-    ' Change the table reference if the table is in another workbook
-
-    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
-End Property
-
 Public Function TableBasicsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
        ByRef Dict As Dictionary)
@@ -186,7 +172,6 @@ Public Sub TableBasicsFormatArrayAndWorksheet( _
     Const RoutineName As String = Module_Name & "TableBasicsFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
-    ' Array and Table formatting goes here
 
 Done:
     Exit Sub
@@ -197,6 +182,20 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableBasicsFormatArrayAndWorksheet
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'         The routines that follow may need        '
+'        changes depending on the application      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Public Property Get TableBasicsTable() As ListObject
+
+    ' Change the table reference if the table is in another workbook
+
+    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
+End Property
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
