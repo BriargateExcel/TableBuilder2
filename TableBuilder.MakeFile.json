@@ -2,19 +2,18 @@
 	"VBAProject Name": "TableBuilder",
 	"Base Path": "C:\\Users\\DickDye\\Documents\\Excel\\TableBuilder\\TableBuilderSource",
 	"Module Paths": {
-		"TableDetails_Table": "TableDetails_Table.cls",
-		"TableBasics_Table": "TableBasics_Table.cls",
-		"Error_WarningRoutines": "Error_WarningRoutines.bas",
-		"ErrorFileClass": "ErrorFileClass.cls",
-		"MessageFileClass": "MessageFileClass.cls",
-		"CommonRoutines": "CommonRoutines.bas",
-		"TableBasics": "TableBasics.bas",
-		"Driver": "Driver.bas",
 		"ClassBuilder": "ClassBuilder.bas",
-		"ModuleBuilder": "ModuleBuilder.bas",
-		"TableDetails": "TableDetails.bas",
+		"CommonRoutines": "CommonRoutines.bas",
+		"Driver": "Driver.bas",
+		"Error_WarningRoutines": "Error_WarningRoutines.bas",
 		"iTable": "iTable.cls",
-		"Table": "Table.bas"
+		"MessageFileClass": "MessageFileClass.cls",
+		"ModuleBuilder": "ModuleBuilder.bas",
+		"Table": "Table.bas",
+		"TableBasics": "TableBasics.bas",
+		"TableBasics_Table": "TableBasics_Table.cls",
+		"TableDetails": "TableDetails.bas",
+		"TableDetails_Table": "TableDetails_Table.cls"
 	},
 	"References": [
 		{
