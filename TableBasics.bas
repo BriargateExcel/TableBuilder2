@@ -1,14 +1,18 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 2/8/2020 11:26:08 AM
+' Built on 3/1/2020 9:05:00 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private Const Module_Name As String = "TableBasics."
 
-Private pInitialized As Boolean
-Private pTableBasicsDict As Dictionary
+Private Type TableBasicsType
+    Initialized As Boolean
+    Dict As Dictionary
+End Type
+
+Private This As TableBasicsType
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
@@ -30,16 +34,16 @@ Public Property Get TableBasicsTableNameColumn() As Long
 End Property
 
 Public Property Get TableBasicsDictionary() As Dictionary
-   Set TableBasicsDictionary = pTableBasicsDict
+   Set TableBasicsDictionary = This.Dict
 End Property
 
 Public Property Get TableBasicsInitialized() As Boolean
-   TableBasicsInitialized = pInitialized
+   TableBasicsInitialized = This.Initialized
 End Property
 
 Public Sub TableBasicsReset()
-    pInitialized = False
-    Set pTableBasicsDict = Nothing
+    This.Initialized = False
+    Set This.Dict = Nothing
 End Sub
 
 Public Property Get TableBasicsHeaderWidth() As Long
@@ -60,12 +64,12 @@ Public Sub TableBasicsInitialize()
     Dim TableBasics As TableBasics_Table
     Set TableBasics = New TableBasics_Table
 
-    Set pTableBasicsDict = New Dictionary
-    If Table.TryCopyTableToDictionary(TableBasics, TableBasicsTable, pTableBasicsDict) Then
-        pInitialized = True
+    Set This.Dict = New Dictionary
+    If Table.TryCopyTableToDictionary(TableBasics, TableBasicsTable, This.Dict) Then
+        This.Initialized = True
     Else
         ReportError "Error copying TableBasics table", "Routine", RoutineName
-        pInitialized = False
+        This.Initialized = False
         GoTo Done
     End If
 
@@ -120,7 +124,8 @@ End Function ' TableBasicsTryCopyDictionaryToArray
 
 Public Function TableBasicsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
-       ByRef Dict As Dictionary)
+       ByRef Dict As Dictionary _
+       ) As Boolean
 
     Const RoutineName As String = Module_Name & "TableBasicsTryCopyArrayToDictionary"
     On Error GoTo ErrorHandler

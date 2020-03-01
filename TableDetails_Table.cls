@@ -10,17 +10,31 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 2/8/2020 11:26:08 AM
+' Built on 3/1/2020 9:27:36 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-Private pColumnHeader As String
-Private pVariableName As String
-Private pVariableType As String
-Private pKey As String
-Private pFormat As String
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-Private pTableDetailsDict As Dictionary
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Type TableDetailsType
+    ColumnHeader As String
+    VariableName As String
+    VariableType As String
+    Key As String
+    Format As String
+End Type
+
+Private This As TableDetailsType
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
@@ -35,43 +49,43 @@ Private pTableDetailsDict As Dictionary
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Public Property Get ColumnHeader() As String
-    ColumnHeader = pColumnHeader
+    ColumnHeader = This.ColumnHeader
 End Property
 
 Public Property Let ColumnHeader(ByVal Param As String)
-    pColumnHeader = Param
+    This.ColumnHeader = Param
 End Property
 
 Public Property Get VariableName() As String
-    VariableName = pVariableName
+    VariableName = This.VariableName
 End Property
 
 Public Property Let VariableName(ByVal Param As String)
-    pVariableName = Param
+    This.VariableName = Param
 End Property
 
 Public Property Get VariableType() As String
-    VariableType = pVariableType
+    VariableType = This.VariableType
 End Property
 
 Public Property Let VariableType(ByVal Param As String)
-    pVariableType = Param
+    This.VariableType = Param
 End Property
 
 Public Property Get Key() As String
-    Key = pKey
+    Key = This.Key
 End Property
 
 Public Property Let Key(ByVal Param As String)
-    pKey = Param
+    This.Key = Param
 End Property
 
 Public Property Get Format() As String
-    Format = pFormat
+    Format = This.Format
 End Property
 
 Public Property Let Format(ByVal Param As String)
-    pFormat = Param
+    This.Format = Param
 End Property
 
 Public Property Get iTable_LocalDictionary() As Dictionary

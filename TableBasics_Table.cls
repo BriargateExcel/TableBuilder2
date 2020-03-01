@@ -10,13 +10,27 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 2/8/2020 11:26:08 AM
+' Built on 3/1/2020 9:27:36 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-Private pTableName As String
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'   Start of application specific declarations     '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-Private pTableBasicsDict As Dictionary
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+'                                                  '
+'    End of application specific declarations      '
+'                                                  '
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Private Type TableBasicsType
+    TableName As String
+End Type
+
+Private This As TableBasicsType
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
@@ -31,11 +45,11 @@ Private pTableBasicsDict As Dictionary
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Public Property Get TableName() As String
-    TableName = pTableName
+    TableName = This.TableName
 End Property
 
 Public Property Let TableName(ByVal Param As String)
-    pTableName = Param
+    This.TableName = Param
 End Property
 
 Public Property Get iTable_LocalDictionary() As Dictionary

@@ -3,8 +3,6 @@ Option Explicit
 
 Private Const Module_Name As String = "ClassBuilder."
 
-Private Const Quote As String = """"
-
 Public Sub ClassBuilder( _
     ByVal DetailsDict As Dictionary, _
     ByVal TableName As String, _
@@ -47,23 +45,56 @@ Public Sub ClassBuilder( _
         
     Streamfile.WriteMessageLine Line, StreamName, "Modules", True
     
+    '
+    ' Declarations separator
+    '
+    
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'   Start of application specific declarations     '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    Streamfile.WriteMessageLine Line, StreamName
+
+        
+    '
+    ' Application specific declarations
+    '
+    
+    BuildApplicationUniqueDeclarations Streamfile, StreamName, TableName, ".cls"
+        
+    '
+    ' Declarations separator
+    '
+    
+    Line = _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "'    End of application specific declarations      '" & vbCrLf & _
+        "'                                                  '" & vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    Streamfile.WriteMessageLine Line, StreamName
+
     Dim Entry As Variant
     
     '
-    ' Constants
+    ' Private variables
     '
-
+    Line = PrintString("Private Type %1Type", TableName)
+    Streamfile.WriteMessageLine Line, StreamName
+    
     For Each Entry In DetailsDict.Keys
         Line = PrintString( _
-            "Private p%1 As %2", _
+            "    %1 As %2", _
             DetailsDict.Item(Entry).VariableName, DetailsDict.Item(Entry).VariableType)
         Streamfile.WriteMessageLine Line, StreamName
     Next Entry
-    Streamfile.WriteBlankMessageLines StreamName
     
-    Line = PrintString( _
-        "Private p%1Dict As Dictionary" & vbCrLf, _
-        TableName)
+    Line = PrintString("End Type" & vbCrLf, TableName)
+    Streamfile.WriteMessageLine Line, StreamName
+    
+    Line = PrintString("Private This as %1Type" & vbCrLf, TableName)
     Streamfile.WriteMessageLine Line, StreamName
     
     '
@@ -217,6 +248,12 @@ Public Sub ClassBuilder( _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     Streamfile.WriteMessageLine Line, StreamName
     
+    BuildApplicationUniqueRoutines Streamfile, StreamName, TableName, ".cls"
+    
+    '
+    ' Wrapup
+    '
+
     Set Streamfile = Nothing
 
 Done:
@@ -243,14 +280,14 @@ Private Sub BuildProperties( _
     
     Line = PrintString( _
         "Public Property Get %1() as %2" & vbCrLf & _
-        "    %1 = p%1" & vbCrLf & _
+        "    %1 = This.%1" & vbCrLf & _
         "End Property" & vbCrLf, _
         Record.VariableName, Record.VariableType)
     Streamfile.WriteMessageLine Line, StreamName
     
     Line = PrintString( _
         "Public Property Let %1(ByVal Param as %2)" & vbCrLf & _
-        "    p%1 = Param" & vbCrLf & _
+        "    This.%1 = Param" & vbCrLf & _
         "End Property" & vbCrLf, _
         Record.VariableName, Record.VariableType)
     Streamfile.WriteMessageLine Line, StreamName
@@ -264,5 +301,4 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' BuildProperties
-
 

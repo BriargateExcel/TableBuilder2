@@ -3,8 +3,6 @@ Option Explicit
 
 Private Const Module_Name As String = "ModuleBuilder."
 
-Private Const Quote As String = """"
-
 Public Sub ModuleBuilder( _
     ByVal DetailsDict As Dictionary, _
     ByVal TableName As String, _
@@ -24,7 +22,7 @@ Public Sub ModuleBuilder( _
     Dim Line As String
     
     '
-    ' Declarations and public column properties
+    ' Module name and initial declarations
     '
     
     Line = PrintString( _
@@ -36,22 +34,39 @@ Public Sub ModuleBuilder( _
         "' See BriargateExcel.com for details" & vbCrLf & _
         vbCrLf & _
         "Private Const Module_Name As String = qq%1.qq" & vbCrLf & vbCrLf & _
-        "Private pInitialized As Boolean", _
+        "Private Type %1Type" & vbCrLf & _
+        "    Initialized as Boolean" & vbCrLf & _
+        "    Dict as Dictionary" & vbCrLf & _
+        "End Type" & vbCrLf & _
+        vbCrLf & _
+        "Private This as %1Type" & vbCrLf, _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName, "Modules", True
 
-    Line = PrintString( _
-        "Private p%1Dict As Dictionary" & vbCrLf, _
-        TableName)
-    Streamfile.WriteMessageLine Line, StreamName
+    '
+    ' Declarations separator
+    '
     
     Line = _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "'   Start of application specific declarations     '" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        vbCrLf & _
+        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
+    Streamfile.WriteMessageLine Line, StreamName
+
+        
+    '
+    ' Application specific declarations
+    '
+    
+    BuildApplicationUniqueDeclarations Streamfile, StreamName, TableName, ".bas"
+        
+    '
+    ' Declarations separator
+    '
+    
+    Line = _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
         "'                                                  '" & vbCrLf & _
         "'    End of application specific declarations      '" & vbCrLf & _
@@ -59,6 +74,10 @@ Public Sub ModuleBuilder( _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     Streamfile.WriteMessageLine Line, StreamName
 
+    '
+    ' Constants and properties
+    '
+    
     BuildConstantsAndProperties Streamfile, StreamName, DetailsDict, TableName
 
     '
@@ -66,7 +85,7 @@ Public Sub ModuleBuilder( _
     '
     Line = PrintString( _
         "Public Property Get %1Dictionary() As Dictionary" & vbCrLf & _
-        "   Set %1Dictionary = p%1Dict" & vbCrLf & _
+        "   Set %1Dictionary = This.Dict" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
@@ -77,7 +96,7 @@ Public Sub ModuleBuilder( _
     
     Line = PrintString( _
         "Public Property Get %1Initialized() As Boolean" & vbCrLf & _
-        "   %1Initialized = pInitialized" & vbCrLf & _
+        "   %1Initialized = This.Initialized" & vbCrLf & _
         "End Property" & vbCrLf, _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
@@ -88,8 +107,8 @@ Public Sub ModuleBuilder( _
     
     Line = PrintString( _
         "Public Sub %1Reset()" & vbCrLf & _
-        "    pInitialized = False" & vbCrLf & _
-        "    Set p%1Dict = Nothing" & vbCrLf & _
+        "    This.Initialized = False" & vbCrLf & _
+        "    Set This.Dict = Nothing" & vbCrLf & _
         "End Sub" & vbCrLf, _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
@@ -127,12 +146,12 @@ Public Sub ModuleBuilder( _
         "    Dim  %1 As %2" & vbCrLf & _
         "    Set %1 = New %2" & vbCrLf & _
         vbCrLf & _
-        "    Set p%1Dict = New Dictionary" & vbCrLf & _
-        "    If Table.TryCopyTableToDictionary(%1, %1Table, p%1Dict) Then" & vbCrLf & _
-        "        pInitialized = True" & vbCrLf & _
+        "    Set This.Dict = New Dictionary" & vbCrLf & _
+        "    If Table.TryCopyTableToDictionary(%1, %1Table, This.Dict) Then" & vbCrLf & _
+        "        This.Initialized = True" & vbCrLf & _
         "    Else" & vbCrLf & _
         "        ReportError qqError copying %1 tableqq, qqRoutineqq, RoutineName" & vbCrLf & _
-        "        pInitialized = False" & vbCrLf & _
+        "        This.Initialized = False" & vbCrLf & _
         "        GoTo Done" & vbCrLf & _
         "    End If" & vbCrLf, _
         TableName, ClassName)
@@ -180,7 +199,8 @@ Public Sub ModuleBuilder( _
     Line = PrintString( _
         "Public Function %1TryCopyArrayToDictionary( _" & vbCrLf & _
         "       ByVal Ary As Variant, _" & vbCrLf & _
-        "       ByRef Dict As Dictionary)" & vbCrLf & _
+        "       ByRef Dict As Dictionary _" & vbCrLf & _
+        "       ) As Boolean" & vbCrLf & _
         vbCrLf & _
         "    Const RoutineName As String = Module_Name & qq%1TryCopyArrayToDictionaryqq" & vbCrLf & _
         "    On Error GoTo ErrorHandler" & vbCrLf & _
@@ -216,7 +236,7 @@ Public Sub ModuleBuilder( _
     SubEnding Streamfile, StreamName, TableName & "FormatArrayAndWorksheet"
     
     '
-    ' Sub Property Get Routines
+    ' Property Get Routines
     '
     
     BuildPropertyGetRoutines Streamfile, StreamName, DetailsDict, TableName
@@ -260,6 +280,16 @@ Public Sub ModuleBuilder( _
         "'                                                  '" & vbCrLf & _
         "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     Streamfile.WriteMessageLine Line, StreamName
+
+    '
+    ' End of generated code comment
+    '
+
+    BuildApplicationUniqueRoutines Streamfile, StreamName, TableName, ".bas"
+    
+    '
+    ' Wrapup
+    '
 
     Set Streamfile = Nothing
 
@@ -455,7 +485,7 @@ Private Sub BuildCheckExists( _
         "    Const RoutineName As String = Module_Name & qqCheck%1Existsqq" & vbCrLf & _
         "    On Error GoTo ErrorHandler" & vbCrLf & _
         vbCrLf & _
-        "    If Not pInitialized Then %2Initialize" & vbCrLf, _
+        "    If Not This.Initialized Then %2Initialize" & vbCrLf, _
         Key, TableName)
     Streamfile.WriteMessageLine Line, StreamName
     
@@ -465,7 +495,7 @@ Private Sub BuildCheckExists( _
         "        Exit Function" & vbCrLf & _
         "    End If" & vbCrLf & _
         vbCrLf & _
-        "    Check%1Exists = p%2Dict.Exists(%1)" & vbCrLf, _
+        "    Check%1Exists = This.Dict.Exists(%1)" & vbCrLf, _
         Key, TableName)
     Streamfile.WriteMessageLine Line, StreamName
 
@@ -495,7 +525,7 @@ Private Sub BuildKeyArray( _
     Dim Count As Long
     For Each Entry In Dict
         Set TD = Dict(Entry)
-        If Left(TD.Key, 3) = "Key" Then
+        If Left$(TD.Key, 3) = "Key" Then
             Count = Count + 1
         End If
     Next Entry
@@ -512,9 +542,9 @@ Private Sub BuildKeyArray( _
     For Each Entry In Dict
         Set TD = Dict(Entry)
         Key = TD.Key
-        If Left(Key, 3) = "Key" Then
+        If Left$(Key, 3) = "Key" Then
             If Len(Key) > 3 Then
-                Ary(Right(Key, 1)) = TD.VariableName
+                Ary(Right$(Key, 1)) = TD.VariableName
             Else
                 ' This is the only Key
                 Ary(1) = TD.VariableName
@@ -548,7 +578,6 @@ Private Sub ArrayToRecord( _
     Dim Ary As Variant
     BuildKeyArray DetailsDict, Ary
     
-    Dim Key As String
     Dim Line As String
     
     If UBound(Ary, 1) = 1 Or Ary(1) = "None" Then
@@ -616,7 +645,7 @@ Private Sub BuildNoneOrOneKey( _
             "            Key = Ary(I, p%2Column)" & vbCrLf) & _
         vbCrLf & _
         "            If Dict.Exists(Key) Then" & vbCrLf & _
-        "                ReportWarning " & Quote & "Duplicate keyqq, qqRoutineqq, RoutineName, qqKeyqq, Key" & vbCrLf & _
+        "                ReportWarning qqDuplicate keyqq, qqRoutineqq, RoutineName, qqKeyqq, Key" & vbCrLf & _
         "                %3TryCopyArrayToDictionary = False" & vbCrLf & _
         "                GoTo Done" & vbCrLf & _
         "            Else" & vbCrLf & _
@@ -668,7 +697,7 @@ Private Sub BuildMoreThanOneKey( _
     
     Line = PrintString( _
         "            If Dict.Exists(Key) Then" & vbCrLf & _
-        "                ReportWarning " & Quote & "Duplicate keyqq, qqRoutineqq, RoutineName, qqKeyqq, Key" & vbCrLf & _
+        "                ReportWarning qqDuplicate keyqq, qqRoutineqq, RoutineName, qqKeyqq, Key" & vbCrLf & _
         "                %1TryCopyArrayToDictionary = False" & vbCrLf & _
         "                GoTo Done" & vbCrLf & _
         "            Else" & vbCrLf & _
@@ -804,10 +833,10 @@ Private Sub BuildOnePropertyGetRoutine( _
         "    Const RoutineName As String = Module_Name & qqGet%1From%2qq" & vbCrLf & _
         "    On Error GoTo ErrorHandler" & vbCrLf & _
         vbCrLf & _
-        "    If Not pInitialized Then %5Initialize" & vbCrLf & _
+        "    If Not This.Initialized Then %5Initialize" & vbCrLf & _
         vbCrLf & _
         "    If Check%2Exists(%2) Then" & vbCrLf & _
-        "        Get%1From%2 = p%5Dict(%2).%1" & vbCrLf & _
+        "        Get%1From%2 = This.Dict(%2).%1" & vbCrLf & _
         "    Else" & vbCrLf & _
         "        ReportError qqUnrecognized %2qq, qqRoutineqq, RoutineName" & vbCrLf & _
         "    End If" & vbCrLf, _
@@ -928,4 +957,5 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' RoutineEnding
+
 

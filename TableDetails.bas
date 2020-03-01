@@ -1,14 +1,18 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 2/8/2020 11:26:08 AM
+' Built on 3/1/2020 9:05:00 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private Const Module_Name As String = "TableDetails."
 
-Private pInitialized As Boolean
-Private pTableDetailsDict As Dictionary
+Private Type TableDetailsType
+    Initialized As Boolean
+    Dict As Dictionary
+End Type
+
+Private This As TableDetailsType
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 '                                                  '
@@ -50,16 +54,16 @@ Public Property Get TableDetailsFormatColumn() As Long
 End Property
 
 Public Property Get TableDetailsDictionary() As Dictionary
-   Set TableDetailsDictionary = pTableDetailsDict
+   Set TableDetailsDictionary = This.Dict
 End Property
 
 Public Property Get TableDetailsInitialized() As Boolean
-   TableDetailsInitialized = pInitialized
+   TableDetailsInitialized = This.Initialized
 End Property
 
 Public Sub TableDetailsReset()
-    pInitialized = False
-    Set pTableDetailsDict = Nothing
+    This.Initialized = False
+    Set This.Dict = Nothing
 End Sub
 
 Public Property Get TableDetailsHeaderWidth() As Long
@@ -83,12 +87,12 @@ Public Sub TableDetailsInitialize()
     Dim TableDetails As TableDetails_Table
     Set TableDetails = New TableDetails_Table
 
-    Set pTableDetailsDict = New Dictionary
-    If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, pTableDetailsDict) Then
-        pInitialized = True
+    Set This.Dict = New Dictionary
+    If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, This.Dict) Then
+        This.Initialized = True
     Else
         ReportError "Error copying TableDetails table", "Routine", RoutineName
-        pInitialized = False
+        This.Initialized = False
         GoTo Done
     End If
 
@@ -150,14 +154,14 @@ Public Function CheckColumnHeaderExists(ByVal ColumnHeader As String) As Boolean
     Const RoutineName As String = Module_Name & "CheckColumnHeaderExists"
     On Error GoTo ErrorHandler
 
-    If Not pInitialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetailsInitialize
 
     If ColumnHeader = vbNullString Then
         CheckColumnHeaderExists = True
         Exit Function
     End If
 
-    CheckColumnHeaderExists = pTableDetailsDict.Exists(ColumnHeader)
+    CheckColumnHeaderExists = This.Dict.Exists(ColumnHeader)
 
 Done:
     Exit Function
@@ -171,7 +175,8 @@ End Function ' CheckColumnHeaderExists
 
 Public Function TableDetailsTryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
-       ByRef Dict As Dictionary)
+       ByRef Dict As Dictionary _
+       ) As Boolean
 
     Const RoutineName As String = Module_Name & "TableDetailsTryCopyArrayToDictionary"
     On Error GoTo ErrorHandler
@@ -243,10 +248,10 @@ Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String
     Const RoutineName As String = Module_Name & "GetVariableNameFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not pInitialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetailsInitialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
-        GetVariableNameFromColumnHeader = pTableDetailsDict(ColumnHeader).VariableName
+        GetVariableNameFromColumnHeader = This.Dict(ColumnHeader).VariableName
     Else
         ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
     End If
@@ -266,10 +271,10 @@ Public Property Get GetVariableTypeFromColumnHeader(ByVal ColumnHeader As String
     Const RoutineName As String = Module_Name & "GetVariableTypeFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not pInitialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetailsInitialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
-        GetVariableTypeFromColumnHeader = pTableDetailsDict(ColumnHeader).VariableType
+        GetVariableTypeFromColumnHeader = This.Dict(ColumnHeader).VariableType
     Else
         ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
     End If
@@ -289,10 +294,10 @@ Public Property Get GetKeyFromColumnHeader(ByVal ColumnHeader As String) As Stri
     Const RoutineName As String = Module_Name & "GetKeyFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not pInitialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetailsInitialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
-        GetKeyFromColumnHeader = pTableDetailsDict(ColumnHeader).Key
+        GetKeyFromColumnHeader = This.Dict(ColumnHeader).Key
     Else
         ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
     End If
@@ -312,10 +317,10 @@ Public Property Get GetFormatFromColumnHeader(ByVal ColumnHeader As String) As S
     Const RoutineName As String = Module_Name & "GetFormatFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not pInitialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetailsInitialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
-        GetFormatFromColumnHeader = pTableDetailsDict(ColumnHeader).Format
+        GetFormatFromColumnHeader = This.Dict(ColumnHeader).Format
     Else
         ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
     End If
