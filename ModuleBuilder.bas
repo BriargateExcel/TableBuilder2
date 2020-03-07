@@ -44,36 +44,11 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName, "Modules", True
 
     '
-    ' Declarations separator
-    '
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'   Start of application specific declarations     '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
-        
-    '
     ' Application specific declarations
     '
     
     BuildApplicationUniqueDeclarations Streamfile, StreamName, TableName, ".bas"
         
-    '
-    ' Declarations separator
-    '
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'    End of application specific declarations      '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
     '
     ' Constants and properties
     '
@@ -268,23 +243,6 @@ Public Sub ModuleBuilder( _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
 
-    '
-    ' End of generated code comment
-    '
-
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'             End of Generated code                '" & vbCrLf & _
-        "'            Start unique code here                '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
-    '
-    ' End of generated code comment
-    '
-
     BuildApplicationUniqueRoutines Streamfile, StreamName, TableName, ".bas"
     
     '
@@ -421,21 +379,37 @@ Private Sub BuildColumnConstants( _
         TableName)
     Streamfile.WriteMessageLine Line, StreamName
     
-    Line = PrintString( _
-        "    %1Headers = Array( _" & vbCrLf & _
-        "        qq%2qq, _" & vbCrLf, _
-        TableName, DetailsDict.Items(0).ColumnHeader)
-        
+    ' First Headers
+    Dim StartPoint As Long
+    If DetailsDict.Count Mod 2 = 0 Then
+        Line = PrintString( _
+            "    %1Headers = Array( _" & vbCrLf & _
+            "        qq%2qq, _" & vbCrLf, _
+            TableName, DetailsDict.Items(0).ColumnHeader)
+        StartPoint = 1
+    Else
+        Line = PrintString( _
+            "    %1Headers = Array( _" & vbCrLf & _
+            "        qq%2qq, qq%3qq, _" & vbCrLf, _
+            TableName, DetailsDict.Items(0).ColumnHeader, DetailsDict.Items(1).ColumnHeader)
+        StartPoint = 2
+    End If
+    ' Remaining Headers
     Dim I As Long
-    For I = 1 To DetailsDict.Count - 2
+    For I = StartPoint To DetailsDict.Count - 2 Step 2
         Line = PrintString(Line & _
-            "        qq%1qq, _" & vbCrLf, _
-            DetailsDict.Items(I).ColumnHeader)
+            "        qq%1qq, qq%2qq, _" & vbCrLf, _
+            DetailsDict.Items(I).ColumnHeader, DetailsDict.Items(I + 1).ColumnHeader)
     Next I
     
+    ' End the last Header
+    If DetailsDict.Count Mod 1 = 0 Then
     Line = PrintString(Line & _
         "        qq%1qq)", _
         DetailsDict.Items(DetailsDict.Count - 1).ColumnHeader)
+    Else
+    Line = Line & "        )"
+    End If
     Streamfile.WriteMessageLine Line, StreamName
     
     Line = "End Property" & vbCrLf

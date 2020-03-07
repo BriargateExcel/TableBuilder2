@@ -10,21 +10,9 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 3/1/2020 9:27:36 AM
+' Built on 3/6/2020 11:23:29 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 Private Type TableDetailsType
     ColumnHeader As String
@@ -36,17 +24,7 @@ End Type
 
 Private This As TableDetailsType
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application specific declarations found
 
 Public Property Get ColumnHeader() As String
     ColumnHeader = This.ColumnHeader
@@ -130,10 +108,5 @@ Public Sub iTable_FormatArrayAndWorksheet( _
     TableDetailsFormatArrayAndWorksheet Ary, Table
 End Sub ' FormatArrayAndWorksheet
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'             End of Generated code                '
-'            Start unique code here                '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application unique routines found
 

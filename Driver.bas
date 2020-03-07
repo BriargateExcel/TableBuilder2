@@ -37,7 +37,7 @@ Public Sub BuildModules()
             ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
         End If
         
-        TableName = BasicDict.Items(0)
+        TableName = BasicDict.Items(0).TableName
         ClassName = TableName & "_Table"
         
         If Table.TryCopyTableToDictionary(TableDetails, DetailsTable, DetailsDict) Then

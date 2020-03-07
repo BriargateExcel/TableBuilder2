@@ -10,39 +10,18 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 3/1/2020 9:27:36 AM
+' Built on 3/6/2020 11:23:29 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
 Private Type TableBasicsType
     TableName As String
+    DataStore As String
 End Type
 
 Private This As TableBasicsType
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application specific declarations found
 
 Public Property Get TableName() As String
     TableName = This.TableName
@@ -50,6 +29,14 @@ End Property
 
 Public Property Let TableName(ByVal Param As String)
     This.TableName = Param
+End Property
+
+Public Property Get DataStore() As String
+    DataStore = This.DataStore
+End Property
+
+Public Property Let DataStore(ByVal Param As String)
+    This.DataStore = Param
 End Property
 
 Public Property Get iTable_LocalDictionary() As Dictionary
@@ -94,10 +81,5 @@ Public Sub iTable_FormatArrayAndWorksheet( _
     TableBasicsFormatArrayAndWorksheet Ary, Table
 End Sub ' FormatArrayAndWorksheet
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'             End of Generated code                '
-'            Start unique code here                '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application unique routines found
 

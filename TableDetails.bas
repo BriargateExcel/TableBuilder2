@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 3/1/2020 9:05:00 AM
+' Built on 3/6/2020 11:23:29 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -14,17 +14,7 @@ End Type
 
 Private This As TableDetailsType
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application specific declarations found
 
 Private Const pColumnHeaderColumn As Long = 1
 Private Const pVariableNameColumn As Long = 2
@@ -349,10 +339,5 @@ Public Property Get TableDetailsTable() As ListObject
     Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
 End Property
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'             End of Generated code                '
-'            Start unique code here                '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application unique routines found
 

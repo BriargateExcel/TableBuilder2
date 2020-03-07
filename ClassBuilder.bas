@@ -46,41 +46,10 @@ Public Sub ClassBuilder( _
     Streamfile.WriteMessageLine Line, StreamName, "Modules", True
     
     '
-    ' Declarations separator
-    '
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'   Start of application specific declarations     '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
-        
-    '
-    ' Application specific declarations
-    '
-    
-    BuildApplicationUniqueDeclarations Streamfile, StreamName, TableName, ".cls"
-        
-    '
-    ' Declarations separator
-    '
-    
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'    End of application specific declarations      '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
-    Dim Entry As Variant
-    
-    '
     ' Private variables
     '
+    Dim Entry As Variant
+    
     Line = PrintString("Private Type %1Type", TableName)
     Streamfile.WriteMessageLine Line, StreamName
     
@@ -96,25 +65,13 @@ Public Sub ClassBuilder( _
     
     Line = PrintString("Private This as %1Type" & vbCrLf, TableName)
     Streamfile.WriteMessageLine Line, StreamName
-    
+            
     '
-    ' Declaration separator
+    ' Application specific declarations
     '
     
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'   Start of application specific declarations     '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'    End of application specific declarations      '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
-    Streamfile.WriteMessageLine Line, StreamName
-
+    BuildApplicationUniqueDeclarations Streamfile, StreamName, TableName, ".cls"
+        
     '
     ' Properties
     '
@@ -233,19 +190,6 @@ Public Sub ClassBuilder( _
         "    %1FormatArrayAndWorksheet Ary, Table" & vbCrLf & _
         "End Sub ' FormatArrayAndWorksheet" & vbCrLf, _
         TableName)
-    Streamfile.WriteMessageLine Line, StreamName
-    
-    '
-    ' End of generated code comment
-    '
-
-    Line = _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "'             End of Generated code                '" & vbCrLf & _
-        "'            Start unique code here                '" & vbCrLf & _
-        "'                                                  '" & vbCrLf & _
-        "''''''''''''''''''''''''''''''''''''''''''''''''''''" & vbCrLf
     Streamfile.WriteMessageLine Line, StreamName
     
     BuildApplicationUniqueRoutines Streamfile, StreamName, TableName, ".cls"

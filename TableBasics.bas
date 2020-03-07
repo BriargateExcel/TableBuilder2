@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 3/1/2020 9:05:00 AM
+' Built on 3/6/2020 11:23:29 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -14,23 +14,18 @@ End Type
 
 Private This As TableBasicsType
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'   Start of application specific declarations     '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'    End of application specific declarations      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application specific declarations found
 
 Private Const pTableNameColumn As Long = 1
-Private Const pHeaderWidth As Long = 1
+Private Const pDataStoreColumn As Long = 2
+Private Const pHeaderWidth As Long = 2
 
 Public Property Get TableBasicsTableNameColumn() As Long
     TableBasicsTableNameColumn = pTableNameColumn
+End Property
+
+Public Property Get TableBasicsDataStoreColumn() As Long
+    TableBasicsDataStoreColumn = pDataStoreColumn
 End Property
 
 Public Property Get TableBasicsDictionary() As Dictionary
@@ -53,7 +48,7 @@ End Property
 Public Property Get TableBasicsHeaders() As Variant
     TableBasicsHeaders = Array( _
         "Table Name", _
-        "Table Name")
+        "Data Store")
 End Property
 
 Public Sub TableBasicsInitialize()
@@ -108,6 +103,7 @@ Public Function TableBasicsTryCopyDictionaryToArray( _
         Set Record = Dict.Item(Entry)
 
         Ary(I, pTableNameColumn) = Record.TableName
+        Ary(I, pDataStoreColumn) = Record.DataStore
 
         I = I + 1
     Next Entry
@@ -151,6 +147,7 @@ Public Function TableBasicsTryCopyArrayToDictionary( _
                 Set Record = New TableBasics_Table
 
                 Record.TableName = Ary(I, pTableNameColumn)
+                Record.DataStore = Ary(I, pDataStoreColumn)
 
                 Dict.Add Key, Record
             End If
@@ -202,10 +199,5 @@ Public Property Get TableBasicsTable() As ListObject
     Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
 End Property
 
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'             End of Generated code                '
-'            Start unique code here                '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+' No application unique routines found
 
