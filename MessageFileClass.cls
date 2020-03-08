@@ -8,6 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+'@Folder "Common"
 ' Changes
 ' 9/15/19
 '       Changed the name of the module from ErrorFilesClass to ErrorFileClass

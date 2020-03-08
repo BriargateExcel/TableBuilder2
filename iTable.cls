@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-
+'@Folder "Common"
 Public Property Get HeaderWidth() As Long
 End Property
 

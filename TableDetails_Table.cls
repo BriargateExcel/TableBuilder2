@@ -8,6 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+'@Folder "Built"
 Implements iTable
 
 ' Built on 3/6/2020 11:23:29 AM

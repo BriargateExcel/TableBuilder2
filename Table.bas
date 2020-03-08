@@ -1,6 +1,6 @@
 Attribute VB_Name = "Table"
 Option Explicit
-
+'@Folder "Common"
 Private Const Module_Name As String = "Table."
 
 Public Function TryCopyDictionaryToTable( _

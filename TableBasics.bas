@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 3/6/2020 11:23:29 AM
+' Built on 3/8/2020 9:42:44 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -28,34 +28,31 @@ Public Property Get TableBasicsDataStoreColumn() As Long
     TableBasicsDataStoreColumn = pDataStoreColumn
 End Property
 
-Public Property Get TableBasicsDictionary() As Dictionary
-   Set TableBasicsDictionary = This.Dict
-End Property
-
-Public Property Get TableBasicsInitialized() As Boolean
-   TableBasicsInitialized = This.Initialized
-End Property
-
-Public Sub TableBasicsReset()
-    This.Initialized = False
-    Set This.Dict = Nothing
-End Sub
-
-Public Property Get TableBasicsHeaderWidth() As Long
-    TableBasicsHeaderWidth = pHeaderWidth
-End Property
-
 Public Property Get TableBasicsHeaders() As Variant
     TableBasicsHeaders = Array( _
         "Table Name", _
         "Data Store")
 End Property
 
+Public Property Get TableBasicsDictionary() As Dictionary
+   Set TableBasicsDictionary = This.Dict
+End Property
+
+Public Property Get TableBasicsTable() As ListObject
+
+    ' Change the table reference if the table is in another workbook
+
+    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
+End Property
+
+Public Property Get TableBasicsInitialized() As Boolean
+   TableBasicsInitialized = This.Initialized
+End Property
+
 Public Sub TableBasicsInitialize()
 
     Const RoutineName As String = Module_Name & "TableBasicsInitialize"
     On Error GoTo ErrorHandler
-
     Dim TableBasics As TableBasics_Table
     Set TableBasics = New TableBasics_Table
 
@@ -77,6 +74,15 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableBasicsInitialize
+
+Public Sub TableBasicsReset()
+    This.Initialized = False
+    Set This.Dict = Nothing
+End Sub
+
+Public Property Get TableBasicsHeaderWidth() As Long
+    TableBasicsHeaderWidth = pHeaderWidth
+End Property
 
 Public Function TableBasicsTryCopyDictionaryToArray( _
     ByVal Dict As Dictionary, _
@@ -184,20 +190,6 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableBasicsFormatArrayAndWorksheet
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-'                                                  '
-'         The routines that follow may need        '
-'        changes depending on the application      '
-'                                                  '
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-Public Property Get TableBasicsTable() As ListObject
-
-    ' Change the table reference if the table is in another workbook
-
-    Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
-End Property
 
 ' No application unique routines found
 

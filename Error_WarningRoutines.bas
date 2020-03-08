@@ -1,5 +1,6 @@
 Attribute VB_Name = "Error_WarningRoutines"
 Option Explicit
+'@Folder "Common"
 ' Changes
 ' 9/15/19
 '       Changed from ErrorFilesClass to ErrorFileClass
