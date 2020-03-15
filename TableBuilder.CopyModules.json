@@ -1,0 +1,10 @@
+{
+	"VBAProject Name": "TableBuilder",
+	"Base Path": "C:\\Users\\DickDye\\Documents\\Excel\\TableBuilder\\TableBuilderSource",
+	"Module Paths": {
+		"TableBasics": "TableBasics.bas",
+		"TableBasics_Table": "TableBasics_Table.cls",
+		"TableDetails": "TableDetails.bas",
+		"TableDetails_Table": "TableDetails_Table.cls"
+	}
+}
