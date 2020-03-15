@@ -22,19 +22,26 @@ Private Const Module_Name As String = "ClassBuilder."
 
 Public Sub ClassBuilder( _
     ByVal DetailsDict As Dictionary, _
-    ByVal TableName As String, _
-    ByVal ClassName As String)
+    ByVal BasicDict As Dictionary)
 
     ' This routine builds the class module
 
     Const RoutineName As String = Module_Name & "ClassBuilder"
     On Error GoTo ErrorHandler
     
+    Dim Streamfile As MessageFileClass
+    Set Streamfile = New MessageFileClass
+    
+    Dim TableName As String
+    Dim ClassName As String
+    TableName = BasicDict.Items(0).TableName
+    ClassName = TableName & "_Table"
+    
     Dim StreamName As String
     StreamName = ClassName & ".cls"
     
-    Dim Streamfile As MessageFileClass
-    Set Streamfile = New MessageFileClass
+    Dim FileName As String
+    FileName = BasicDict.Items(0).FileName
     
     Dim Line As String
     
@@ -109,11 +116,18 @@ Public Sub ClassBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
     
     ' Local Table
-    Line = PrintString( _
-        "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
-        "    Set iTable_Localtable = %1Table" & vbCrLf & _
-        "End Property" & vbCrLf, _
-        TableName)
+    If FileName = vbNullString Then
+        Line = PrintString( _
+            "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
+            "    Set iTable_Localtable = %1Table" & vbCrLf & _
+            "End Property" & vbCrLf, _
+            TableName)
+    Else
+        Line = PrintString( _
+            "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
+            "End Property" & vbCrLf, _
+            TableName)
+    End If
     Streamfile.WriteMessageLine Line, StreamName
     
     ' Local Name

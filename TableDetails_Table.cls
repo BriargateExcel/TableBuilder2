@@ -8,10 +8,9 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-'@Folder "Built"
 Implements iTable
 
-' Built on 3/6/2020 11:23:29 AM
+' Built on 3/15/2020 10:39:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -83,6 +82,10 @@ Public Property Get iTable_Initialized() As Boolean
     iTable_Initialized = TableDetailsInitialized
 End Property
 
+Public Sub iTable_Initialize()
+    TableDetailsInitialize
+End Sub
+
 Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableDetailsTable
 End Property
@@ -90,10 +93,6 @@ End Property
 Public Property Get iTable_LocalName() As String
     iTable_LocalName = "TableDetails_Table"
 End Property
-
-Public Sub iTable_Initialize()
-    TableDetailsInitialize
-End Sub
 
 Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
     iTable_TryCopyArrayToDictionary = TableDetailsTryCopyArrayToDictionary(Ary, Dict)

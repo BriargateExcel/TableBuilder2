@@ -23,19 +23,32 @@ Private Const Module_Name As String = "ModuleBuilder."
 
 Public Sub ModuleBuilder( _
     ByVal DetailsDict As Dictionary, _
-    ByVal TableName As String, _
-    ByVal ClassName As String)
+    ByVal BasicDict As Dictionary)
 
     ' This routine builds the basic module
 
     Const RoutineName As String = Module_Name & "ClassBuilder"
     On Error GoTo ErrorHandler
     
+    Dim Streamfile As MessageFileClass
+    Set Streamfile = New MessageFileClass
+    
+    Dim TableName As String
+    Dim ClassName As String
+    TableName = BasicDict.Items(0).TableName
+    ClassName = TableName & "_Table"
+    
     Dim StreamName As String
     StreamName = TableName & ".bas"
     
-    Dim Streamfile As MessageFileClass
-    Set Streamfile = New MessageFileClass
+    Dim FileName As String
+    FileName = BasicDict.Items(0).FileName
+    
+    Dim WorksheetName As String
+    WorksheetName = BasicDict.Items(0).WorksheetName
+    
+    Dim ExternalTableName As String
+    ExternalTableName = BasicDict.Items(0).ExternalTableName
     
     Dim Line As String
     
@@ -63,15 +76,7 @@ Public Sub ModuleBuilder( _
     Streamfile.WriteMessageLine Line, StreamName
 
     ' Property Get Table
-    Line = PrintString( _
-        "Public Property Get %1Table() As ListObject" & vbCrLf & _
-        vbCrLf & _
-        "    ' Change the table reference if the table is in another workbook" & vbCrLf & _
-        vbCrLf & _
-        "    Set %1Table = %1Sheet.ListObjects(qq%1Tableqq)" & vbCrLf & _
-        "End Property" & vbCrLf, _
-        TableName)
-    Streamfile.WriteMessageLine Line, StreamName
+    BuildGetTable Streamfile, StreamName, TableName, FileName, WorksheetName, ExternalTableName
 
     ' Property Get Initialized
     Line = PrintString( _
@@ -369,10 +374,12 @@ Private Sub BuildCheckExists( _
     Dim TD As TableDetails_Table
     Dim Found As Boolean
     Dim Key As String
+    Dim KeyName As String
     For Each Entry In Dict
         Set TD = Dict(Entry)
         If TD.Key = "Key" Then
             Key = TD.VariableName
+            KeyName = TD.ColumnHeader
             Found = True
             Exit For
         End If
@@ -402,7 +409,8 @@ Private Sub BuildCheckExists( _
         Key, TableName)
     Streamfile.WriteMessageLine Line, StreamName
 
-    BuildFunctionEnding Streamfile, StreamName, "Check" & Key & "Exists"
+    Line = "Check" & Key & "Exists"
+    BuildFunctionEnding Streamfile, StreamName, Line, KeyName, Key
     
 Done:
     Exit Sub
@@ -682,11 +690,13 @@ Private Sub BuildPropertyGetRoutines( _
     Dim Details As TableDetails_Table
     Dim Key As String
     Dim KeyType As String
+    Dim KeyName As String
     For Each Entry In DetailsDict
         Set Details = DetailsDict(Entry)
         If Details.Key = "Key" Then
             Key = Details.VariableName
             KeyType = Details.VariableType
+            KeyName = Details.ColumnHeader
             FoundAKey = True
             Exit For
         End If
@@ -701,7 +711,7 @@ Private Sub BuildPropertyGetRoutines( _
         If Details.VariableName <> Key Then
             Target = Details.VariableName
             TargetType = Details.VariableType
-            BuildOnePropertyGetRoutine Streamfile, StreamName, Key, KeyType, Target, TargetType, TableName
+            BuildOnePropertyGetRoutine Streamfile, StreamName, Key, KeyType, KeyName, Target, TargetType, TableName
         End If
     Next Entry
     
@@ -720,6 +730,7 @@ Private Sub BuildOnePropertyGetRoutine( _
         ByVal StreamName As String, _
         ByVal Key As String, _
         ByVal KeyType As String, _
+        ByVal KeyName As String, _
         ByVal Target As String, _
         ByVal TargetType As String, _
         TableName As String)
@@ -741,13 +752,16 @@ Private Sub BuildOnePropertyGetRoutine( _
         "    If Check%2Exists(%2) Then" & vbCrLf & _
         "        Get%1From%2 = This.Dict(%2).%1" & vbCrLf & _
         "    Else" & vbCrLf & _
-        "        ReportError qqUnrecognized %2qq, qqRoutineqq, RoutineName" & vbCrLf & _
+        "        ReportError qqUnrecognized %2qq, _" & vbCrLf & _
+        "            qqRoutineqq, RoutineName, _" & vbCrLf & _
+        "            qq%6qq, %2" & vbCrLf & _
         "    End If" & vbCrLf, _
-        Target, Key, KeyType, TargetType, TableName)
+        Target, Key, KeyType, TargetType, TableName, KeyName)
         
     Streamfile.WriteMessageLine Line, StreamName
     
-    BuildPropertyEnding Streamfile, StreamName, PrintString("Get%1From%2", Target, Key)
+    Line = PrintString("Get%1From%2", Target, Key)
+    BuildPropertyEnding Streamfile, StreamName, Line, KeyName, Key
     
 Done:
     Exit Sub
@@ -888,14 +902,15 @@ End Sub ' BuildFormatArrayAndWorksheet
 Private Sub BuildSubEnding( _
     ByVal Streamfile As MessageFileClass, _
     ByVal StreamName As String, _
-    ByVal SubName As String)
+    ByVal SubName As String, _
+    ParamArray Args() As Variant)
 
     ' The standard end for subs
     
     Const RoutineName As String = Module_Name & "BuildSubEnding"
     On Error GoTo ErrorHandler
     
-    BuildRoutineEnding Streamfile, StreamName, SubName, "Sub"
+    BuildRoutineEnding Streamfile, StreamName, SubName, "Sub", Args
     
 Done:
     Exit Sub
@@ -910,14 +925,15 @@ End Sub ' BuildSubEnding
 Private Sub BuildFunctionEnding( _
     ByVal Streamfile As MessageFileClass, _
     ByVal StreamName As String, _
-    ByVal FunctionName As String)
+    ByVal FunctionName As String, _
+    ParamArray Args() As Variant)
 
     ' The standard end for functions
     
     Const RoutineName As String = Module_Name & "BuildFunctionEnding"
     On Error GoTo ErrorHandler
     
-    BuildRoutineEnding Streamfile, StreamName, FunctionName, "Function"
+    BuildRoutineEnding Streamfile, StreamName, FunctionName, "Function", Args
 
 Done:
     Exit Sub
@@ -932,14 +948,15 @@ End Sub ' BuildFunctionEnding
 Private Sub BuildPropertyEnding( _
     ByVal Streamfile As MessageFileClass, _
     ByVal StreamName As String, _
-    ByVal SubName As String)
+    ByVal SubName As String, _
+    ParamArray Args() As Variant)
 
     ' The standard end for Property
     
     Const RoutineName As String = Module_Name & "BuildPropertyEnding"
     On Error GoTo ErrorHandler
     
-    BuildRoutineEnding Streamfile, StreamName, SubName, "Property"
+    BuildRoutineEnding Streamfile, StreamName, SubName, "Property", Args
     
 Done:
     Exit Sub
@@ -955,7 +972,8 @@ Private Sub BuildRoutineEnding( _
     ByVal Streamfile As MessageFileClass, _
     ByVal StreamName As String, _
     ByVal SubName As String, _
-    ByVal RoutineType As String)
+    ByVal RoutineType As String, _
+    ParamArray Args() As Variant)
 
     ' Creates a standard routine ending
     
@@ -964,18 +982,46 @@ Private Sub BuildRoutineEnding( _
     
     Dim Line As String
     
-    Line = PrintString( _
-        "Done:" & vbCrLf & _
-        "    Exit %1" & vbCrLf & _
-        "ErrorHandler:" & vbCrLf & _
-        "    ReportError qqException raisedqq, _" & vbCrLf & _
-        "                qqRoutineqq, RoutineName, _" & vbCrLf & _
-        "                qqError Numberqq, Err.Number, _" & vbCrLf & _
-        "                qqError Descriptionqq, Err.Description" & vbCrLf & _
-        "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
-        "End %1 ' %2" & vbCrLf, _
-        RoutineType, SubName)
-    Streamfile.WriteMessageLine Line, StreamName
+    Debug.Assert UBound(Args(0), 1) Mod 2 <> 0
+    
+    If UBound(Args(0), 1) = 0 Then
+        Line = PrintString( _
+            "Done:" & vbCrLf & _
+            "    Exit %1" & vbCrLf & _
+            "ErrorHandler:" & vbCrLf & _
+            "    ReportError qqException raisedqq, _" & vbCrLf & _
+            "                qqRoutineqq, RoutineName, _" & vbCrLf & _
+            "                qqError Numberqq, Err.Number, _" & vbCrLf & _
+            "                qqError Descriptionqq, Err.Description" & vbCrLf & _
+            "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
+            "End %1 ' %2" & vbCrLf, _
+            RoutineType, SubName)
+        Streamfile.WriteMessageLine Line, StreamName
+    Else
+        Line = PrintString( _
+            "Done:" & vbCrLf & _
+            "    Exit %1" & vbCrLf & _
+            "ErrorHandler:" & vbCrLf & _
+            "    ReportError qqException raisedqq, _" & vbCrLf & _
+            "                qqRoutineqq, RoutineName, _" & vbCrLf & _
+            "                qqError Numberqq, Err.Number, _" & vbCrLf & _
+            "                qqError Descriptionqq, Err.Description", _
+            RoutineType)
+            
+            Dim I As Long
+            For I = 0 To IIf(UBound(Args(0), 1) Mod 2 = 0, UBound(Args(0), 1) - 2, UBound(Args(0), 1) - 1) Step 2
+                Line = Line & "' _" & vbCrLf & _
+                    PrintString("                qq" & Args(0)(I) & "qq, " & Args(0)(I + 1))
+            Next I
+            Line = Line & vbCrLf
+            Streamfile.WriteMessageLine Line, StreamName
+            
+        Line = PrintString( _
+            "    RaiseError Err.Number, Err.Source, RoutineName, Err.Description" & vbCrLf & _
+            "End %1 ' %2" & vbCrLf, _
+            RoutineType, SubName)
+            Streamfile.WriteMessageLine Line, StreamName
+    End If
     
 Done:
     Exit Sub
@@ -987,3 +1033,86 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' BuildRoutineEnding
 
+Private Sub BuildGetTable( _
+    ByVal Streamfile As MessageFileClass, _
+    ByVal StreamName As String, _
+    ByVal TableName As String, _
+    ByVal FileName As String, _
+    ByVal WorksheetName As String, _
+    ByVal ExternalTableName As String)
+
+    ' Builds the Get Table routine
+    
+    Const RoutineName As String = Module_Name & "BuildGetTable"
+    On Error GoTo ErrorHandler
+    
+    Dim Line As String
+    
+    ' todo: check FileName for Excel file then build as below
+    If FileName = vbNullString Then
+        Line = PrintString( _
+            "Public Property Get %1Table() As ListObject" & vbCrLf & _
+            "    Set %1Table = %1Sheet.ListObjects(qq%1Tableqq)" & vbCrLf & _
+            "End Property" & vbCrLf, _
+            TableName)
+    Else
+        Line = PrintString( _
+            "Public Property Get %1Table() As ListObject" & vbCrLf & _
+            "'    Table not in this workbook" & vbCrLf & _
+            "End Property" & vbCrLf, _
+            TableName)
+    End If
+    Streamfile.WriteMessageLine Line, StreamName
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' BuildGetTable
+
+'Public Property Get TestTable() As ListObject
+'    Dim FileName As String
+'    FileName = GetDataFilesFolder & Application.PathSeparator & WorkbookName
+'
+'    Set Wkbk = Workbooks.Open(FileName:=FileName, UpdateLinks:=0, ReadOnly:=True)
+'
+'    Dim Wksht As Worksheet
+'    Set Wksht = Wkbk.Worksheets(WorksheetName)
+'
+'    Set TestTable = Wksht.ListObjects(TableName)
+'End Property
+'
+'Public Sub TestInitialize()
+'
+'    Const RoutineName As String = Module_Name & "TestInitialize"
+'    On Error GoTo ErrorHandler
+'    Dim CalendarRates As CalendarRates_Table
+'    Set CalendarRates = New CalendarRates_Table
+'
+'    Dim Dict As Dictionary
+'    Set Dict = New Dictionary
+'    If Table.TryCopyTableToDictionary(CalendarRates, TestTable, Dict) Then
+'        Initialized = True
+'    Else
+'        ReportError "Error copying CalendarRates table", "Routine", RoutineName
+'        Initialized = False
+'        GoTo Done
+'    End If
+'
+'Done:
+'    Wkbk.Close
+'    Exit Sub
+'ErrorHandler:
+'    Wkbk.Close
+'    ReportError "Exception raised", _
+'                "Routine", RoutineName, _
+'                "Error Number", Err.Number, _
+'                "Error Description", Err.Description
+'    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+'End Sub ' TestInitialize
+'
+'

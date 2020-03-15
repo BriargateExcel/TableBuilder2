@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 3/8/2020 9:42:44 AM
+' Built on 3/15/2020 10:39:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -17,21 +17,32 @@ Private This As TableBasicsType
 ' No application specific declarations found
 
 Private Const pTableNameColumn As Long = 1
-Private Const pDataStoreColumn As Long = 2
-Private Const pHeaderWidth As Long = 2
+Private Const pFileNameColumn As Long = 2
+Private Const pWorksheetNameColumn As Long = 3
+Private Const pExternalTableNameColumn As Long = 4
+Private Const pHeaderWidth As Long = 4
 
 Public Property Get TableBasicsTableNameColumn() As Long
     TableBasicsTableNameColumn = pTableNameColumn
 End Property
 
-Public Property Get TableBasicsDataStoreColumn() As Long
-    TableBasicsDataStoreColumn = pDataStoreColumn
+Public Property Get TableBasicsFileNameColumn() As Long
+    TableBasicsFileNameColumn = pFileNameColumn
+End Property
+
+Public Property Get TableBasicsWorksheetNameColumn() As Long
+    TableBasicsWorksheetNameColumn = pWorksheetNameColumn
+End Property
+
+Public Property Get TableBasicsExternalTableNameColumn() As Long
+    TableBasicsExternalTableNameColumn = pExternalTableNameColumn
 End Property
 
 Public Property Get TableBasicsHeaders() As Variant
     TableBasicsHeaders = Array( _
         "Table Name", _
-        "Data Store")
+        "File Name", "Worksheet Name", _
+        "External Table Name")
 End Property
 
 Public Property Get TableBasicsDictionary() As Dictionary
@@ -39,9 +50,6 @@ Public Property Get TableBasicsDictionary() As Dictionary
 End Property
 
 Public Property Get TableBasicsTable() As ListObject
-
-    ' Change the table reference if the table is in another workbook
-
     Set TableBasicsTable = TableBasicsSheet.ListObjects("TableBasicsTable")
 End Property
 
@@ -72,6 +80,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableBasicsInitialize
 
@@ -109,7 +118,9 @@ Public Function TableBasicsTryCopyDictionaryToArray( _
         Set Record = Dict.Item(Entry)
 
         Ary(I, pTableNameColumn) = Record.TableName
-        Ary(I, pDataStoreColumn) = Record.DataStore
+        Ary(I, pFileNameColumn) = Record.FileName
+        Ary(I, pWorksheetNameColumn) = Record.WorksheetName
+        Ary(I, pExternalTableNameColumn) = Record.ExternalTableName
 
         I = I + 1
     Next Entry
@@ -121,6 +132,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableBasicsTryCopyDictionaryToArray
 
@@ -153,7 +165,9 @@ Public Function TableBasicsTryCopyArrayToDictionary( _
                 Set Record = New TableBasics_Table
 
                 Record.TableName = Ary(I, pTableNameColumn)
-                Record.DataStore = Ary(I, pDataStoreColumn)
+                Record.FileName = Ary(I, pFileNameColumn)
+                Record.WorksheetName = Ary(I, pWorksheetNameColumn)
+                Record.ExternalTableName = Ary(I, pExternalTableNameColumn)
 
                 Dict.Add Key, Record
             End If
@@ -170,6 +184,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableBasicsTryCopyArrayToDictionary
 
@@ -188,6 +203,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableBasicsFormatArrayAndWorksheet
 

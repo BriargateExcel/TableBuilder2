@@ -8,18 +8,17 @@ Public Sub BuildModules()
     Const RoutineName As String = Module_Name & "Main"
     On Error GoTo ErrorHandler
     
-    Dim BasicDict As Dictionary
-    Dim DetailsDict As Dictionary
-    Dim TableName As String
-    Dim ClassName As String
     Dim Sheet As Variant
-    Dim DetailsTable As ListObject
-    Dim BasicsTable As ListObject
-    Dim TableDetails As TableDetails_Table
-    Set TableDetails = New TableDetails_Table
     
+    Dim BasicDict As Dictionary
+    Dim BasicsTable As ListObject
     Dim TableBasics As TableBasics_Table
     Set TableBasics = New TableBasics_Table
+    
+    Dim DetailsDict As Dictionary
+    Dim DetailsTable As ListObject
+    Dim TableDetails As TableDetails_Table
+    Set TableDetails = New TableDetails_Table
     
     For Each Sheet In ThisWorkbook.Worksheets
         Set BasicsTable = Sheet.ListObjects(2)
@@ -37,18 +36,15 @@ Public Sub BuildModules()
             ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
         End If
         
-        TableName = BasicDict.Items(0).TableName
-        ClassName = TableName & "_Table"
-        
         If Table.TryCopyTableToDictionary(TableDetails, DetailsTable, DetailsDict) Then
             ' Success; do nothing
         Else
             ReportError "Error copying Table to dictionary", "Routine", RoutineName
         End If
         
-        ClassBuilder.ClassBuilder DetailsDict, TableName, ClassName
+        ClassBuilder.ClassBuilder DetailsDict, BasicDict
         
-        ModuleBuilder.ModuleBuilder DetailsDict, TableName, ClassName
+        ModuleBuilder.ModuleBuilder DetailsDict, BasicDict
     Next Sheet
 
     MsgBox "Files built", vbOKOnly

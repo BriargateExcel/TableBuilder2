@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 3/8/2020 9:42:44 AM
+' Built on 3/15/2020 10:39:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -60,7 +60,9 @@ Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetVariableNameFromColumnHeader = This.Dict(ColumnHeader).VariableName
     Else
-        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+        ReportError "Unrecognized ColumnHeader", _
+            "Routine", RoutineName, _
+            "Column Header", ColumnHeader
     End If
 
 Done:
@@ -69,7 +71,9 @@ ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
-                "Error Description", Err.Description
+                "Error Description", Err.Description ' _
+                "Column Header", ColumnHeader
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Property ' GetVariableNameFromColumnHeader
 
@@ -83,7 +87,9 @@ Public Property Get GetVariableTypeFromColumnHeader(ByVal ColumnHeader As String
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetVariableTypeFromColumnHeader = This.Dict(ColumnHeader).VariableType
     Else
-        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+        ReportError "Unrecognized ColumnHeader", _
+            "Routine", RoutineName, _
+            "Column Header", ColumnHeader
     End If
 
 Done:
@@ -92,7 +98,9 @@ ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
-                "Error Description", Err.Description
+                "Error Description", Err.Description ' _
+                "Column Header", ColumnHeader
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Property ' GetVariableTypeFromColumnHeader
 
@@ -106,7 +114,9 @@ Public Property Get GetKeyFromColumnHeader(ByVal ColumnHeader As String) As Stri
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetKeyFromColumnHeader = This.Dict(ColumnHeader).Key
     Else
-        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+        ReportError "Unrecognized ColumnHeader", _
+            "Routine", RoutineName, _
+            "Column Header", ColumnHeader
     End If
 
 Done:
@@ -115,7 +125,9 @@ ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
-                "Error Description", Err.Description
+                "Error Description", Err.Description ' _
+                "Column Header", ColumnHeader
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Property ' GetKeyFromColumnHeader
 
@@ -129,7 +141,9 @@ Public Property Get GetFormatFromColumnHeader(ByVal ColumnHeader As String) As S
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetFormatFromColumnHeader = This.Dict(ColumnHeader).Format
     Else
-        ReportError "Unrecognized ColumnHeader", "Routine", RoutineName
+        ReportError "Unrecognized ColumnHeader", _
+            "Routine", RoutineName, _
+            "Column Header", ColumnHeader
     End If
 
 Done:
@@ -138,7 +152,9 @@ ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
-                "Error Description", Err.Description
+                "Error Description", Err.Description ' _
+                "Column Header", ColumnHeader
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Property ' GetFormatFromColumnHeader
 
@@ -147,9 +163,6 @@ Public Property Get TableDetailsDictionary() As Dictionary
 End Property
 
 Public Property Get TableDetailsTable() As ListObject
-
-    ' Change the table reference if the table is in another workbook
-
     Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
 End Property
 
@@ -180,6 +193,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableDetailsInitialize
 
@@ -232,6 +246,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyDictionaryToArray
 
@@ -284,6 +299,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyArrayToDictionary
 
@@ -307,7 +323,9 @@ ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
-                "Error Description", Err.Description
+                "Error Description", Err.Description ' _
+                "Column Header", ColumnHeader
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' CheckColumnHeaderExists
 
@@ -326,6 +344,7 @@ ErrorHandler:
                 "Routine", RoutineName, _
                 "Error Number", Err.Number, _
                 "Error Description", Err.Description
+
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableDetailsFormatArrayAndWorksheet
 

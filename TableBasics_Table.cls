@@ -8,16 +8,17 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-'@Folder "Built"
 Implements iTable
 
-' Built on 3/6/2020 11:23:29 AM
+' Built on 3/15/2020 10:39:08 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private Type TableBasicsType
     TableName As String
-    DataStore As String
+    FileName As String
+    WorksheetName As String
+    ExternalTableName As String
 End Type
 
 Private This As TableBasicsType
@@ -32,12 +33,28 @@ Public Property Let TableName(ByVal Param As String)
     This.TableName = Param
 End Property
 
-Public Property Get DataStore() As String
-    DataStore = This.DataStore
+Public Property Get FileName() As String
+    FileName = This.FileName
 End Property
 
-Public Property Let DataStore(ByVal Param As String)
-    This.DataStore = Param
+Public Property Let FileName(ByVal Param As String)
+    This.FileName = Param
+End Property
+
+Public Property Get WorksheetName() As String
+    WorksheetName = This.WorksheetName
+End Property
+
+Public Property Let WorksheetName(ByVal Param As String)
+    This.WorksheetName = Param
+End Property
+
+Public Property Get ExternalTableName() As String
+    ExternalTableName = This.ExternalTableName
+End Property
+
+Public Property Let ExternalTableName(ByVal Param As String)
+    This.ExternalTableName = Param
 End Property
 
 Public Property Get iTable_LocalDictionary() As Dictionary
@@ -56,6 +73,10 @@ Public Property Get iTable_Initialized() As Boolean
     iTable_Initialized = TableBasicsInitialized
 End Property
 
+Public Sub iTable_Initialize()
+    TableBasicsInitialize
+End Sub
+
 Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableBasicsTable
 End Property
@@ -63,10 +84,6 @@ End Property
 Public Property Get iTable_LocalName() As String
     iTable_LocalName = "TableBasics_Table"
 End Property
-
-Public Sub iTable_Initialize()
-    TableBasicsInitialize
-End Sub
 
 Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
     iTable_TryCopyArrayToDictionary = TableBasicsTryCopyArrayToDictionary(Ary, Dict)
