@@ -1,18 +1,19 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 3/15/2020 10:39:08 AM
+' Built on 3/23/2020 11:18:26 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
 Private Const Module_Name As String = "TableDetails."
 
-Private Type TableDetailsType
+Private Type PrivateType
     Initialized As Boolean
     Dict As Dictionary
-End Type
+    Wkbk As Workbook
+End Type ' PrivateType
 
-Private This As TableDetailsType
+Private This As PrivateType
 
 ' No application specific declarations found
 
@@ -23,31 +24,86 @@ Private Const pKeyColumn As Long = 4
 Private Const pFormatColumn As Long = 5
 Private Const pHeaderWidth As Long = 5
 
-Public Property Get TableDetailsColumnHeaderColumn() As Long
-    TableDetailsColumnHeaderColumn = pColumnHeaderColumn
+Private Const pFileName As String = vbNullString
+Private Const pWorksheetName As String = vbNullString
+Private Const pExternalTableName As String = vbNullString
+
+Public Property Get ColumnHeaderColumn() As Long
+    ColumnHeaderColumn = pColumnHeaderColumn
 End Property
 
-Public Property Get TableDetailsVariableNameColumn() As Long
-    TableDetailsVariableNameColumn = pVariableNameColumn
+Public Property Get VariableNameColumn() As Long
+    VariableNameColumn = pVariableNameColumn
 End Property
 
-Public Property Get TableDetailsVariableTypeColumn() As Long
-    TableDetailsVariableTypeColumn = pVariableTypeColumn
+Public Property Get VariableTypeColumn() As Long
+    VariableTypeColumn = pVariableTypeColumn
 End Property
 
-Public Property Get TableDetailsKeyColumn() As Long
-    TableDetailsKeyColumn = pKeyColumn
+Public Property Get KeyColumn() As Long
+    KeyColumn = pKeyColumn
 End Property
 
-Public Property Get TableDetailsFormatColumn() As Long
-    TableDetailsFormatColumn = pFormatColumn
+Public Property Get FormatColumn() As Long
+    FormatColumn = pFormatColumn
 End Property
 
-Public Property Get TableDetailsHeaders() As Variant
-    TableDetailsHeaders = Array( _
+Public Property Get Headers() As Variant
+    Headers = Array( _
         "Column Header", "Variable Name", _
         "Type", "Key", _
         "Format")
+End Property
+
+Public Property Get Dict() As Dictionary
+   Set Dict = This.Dict
+End Property
+
+Public Property Get SpecificTable() As ListObject
+    ' Table in this workbook
+    Set SpecificTable = TableDetailsSheet.ListObjects("TableDetailsTable")
+End Property
+
+Public Property Get Initialized() As Boolean
+   Initialized = This.Initialized
+End Property
+
+Public Sub Initialize()
+
+    Const RoutineName As String = Module_Name & "Initialize"
+    On Error GoTo ErrorHandler
+
+    Dim LocalTable As TableDetails_Table
+    Set LocalTable = New TableDetails_Table
+
+    Set This.Dict = New Dictionary
+    If Table.TryCopyTableToDictionary(LocalTable, TableDetails.SpecificTable, This.Dict) Then
+        This.Initialized = True
+    Else
+        ReportError "Error copying TableDetails table", "Routine", RoutineName
+        This.Initialized = False
+        GoTo Done
+    End If
+
+    If Not This.Wkbk Is Nothing Then This.Wkbk.Close
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' TableDetailsInitialize
+
+Public Sub Reset()
+    This.Initialized = False
+    Set This.Dict = Nothing
+End Sub
+
+Public Property Get HeaderWidth() As Long
+    HeaderWidth = pHeaderWidth
 End Property
 
 Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String) As String
@@ -55,7 +111,7 @@ Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String
     Const RoutineName As String = Module_Name & "GetVariableNameFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not This.Initialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetails.Initialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetVariableNameFromColumnHeader = This.Dict(ColumnHeader).VariableName
@@ -82,7 +138,7 @@ Public Property Get GetVariableTypeFromColumnHeader(ByVal ColumnHeader As String
     Const RoutineName As String = Module_Name & "GetVariableTypeFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not This.Initialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetails.Initialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetVariableTypeFromColumnHeader = This.Dict(ColumnHeader).VariableType
@@ -109,7 +165,7 @@ Public Property Get GetKeyFromColumnHeader(ByVal ColumnHeader As String) As Stri
     Const RoutineName As String = Module_Name & "GetKeyFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not This.Initialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetails.Initialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetKeyFromColumnHeader = This.Dict(ColumnHeader).Key
@@ -136,7 +192,7 @@ Public Property Get GetFormatFromColumnHeader(ByVal ColumnHeader As String) As S
     Const RoutineName As String = Module_Name & "GetFormatFromColumnHeader"
     On Error GoTo ErrorHandler
 
-    If Not This.Initialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetails.Initialize
 
     If CheckColumnHeaderExists(ColumnHeader) Then
         GetFormatFromColumnHeader = This.Dict(ColumnHeader).Format
@@ -158,36 +214,15 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Property ' GetFormatFromColumnHeader
 
-Public Property Get TableDetailsDictionary() As Dictionary
-   Set TableDetailsDictionary = This.Dict
-End Property
+Public Function CreateKey(ByVal Record As TableDetails_Table) As String
 
-Public Property Get TableDetailsTable() As ListObject
-    Set TableDetailsTable = TableDetailsSheet.ListObjects("TableDetailsTable")
-End Property
-
-Public Property Get TableDetailsInitialized() As Boolean
-   TableDetailsInitialized = This.Initialized
-End Property
-
-Public Sub TableDetailsInitialize()
-
-    Const RoutineName As String = Module_Name & "TableDetailsInitialize"
+    Const RoutineName As String = Module_Name & "CreateKey"
     On Error GoTo ErrorHandler
-    Dim TableDetails As TableDetails_Table
-    Set TableDetails = New TableDetails_Table
 
-    Set This.Dict = New Dictionary
-    If Table.TryCopyTableToDictionary(TableDetails, TableDetailsTable, This.Dict) Then
-        This.Initialized = True
-    Else
-        ReportError "Error copying TableDetails table", "Routine", RoutineName
-        This.Initialized = False
-        GoTo Done
-    End If
+    CreateKey = Record.ColumnHeader
 
 Done:
-    Exit Sub
+    Exit Function
 ErrorHandler:
     ReportError "Exception raised", _
                 "Routine", RoutineName, _
@@ -195,30 +230,21 @@ ErrorHandler:
                 "Error Description", Err.Description
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableDetailsInitialize
+End Function ' CreateKey
 
-Public Sub TableDetailsReset()
-    This.Initialized = False
-    Set This.Dict = Nothing
-End Sub
-
-Public Property Get TableDetailsHeaderWidth() As Long
-    TableDetailsHeaderWidth = pHeaderWidth
-End Property
-
-Public Function TableDetailsTryCopyDictionaryToArray( _
+Public Function TryCopyDictionaryToArray( _
     ByVal Dict As Dictionary, _
     ByRef Ary As Variant _
     ) As Boolean
 
-    Const RoutineName As String = Module_Name & "TableDetailsTryCopyDictionaryToArray"
+    Const RoutineName As String = Module_Name & "TryCopyDictionaryToArray"
     On Error GoTo ErrorHandler
 
-    TableDetailsTryCopyDictionaryToArray = True
+    TryCopyDictionaryToArray = True
 
     If Dict.Count = 0 Then
-        ReportError "Error copying TableDetails dictionary to array,", "Routine", RoutineName
-        TableDetailsTryCopyDictionaryToArray = False
+        ReportError "Error copying %1 dictionary to array,", "Routine", RoutineName
+        TryCopyDictionaryToArray = False
         GoTo Done
     End If
 
@@ -250,15 +276,15 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TableDetailsTryCopyDictionaryToArray
 
-Public Function TableDetailsTryCopyArrayToDictionary( _
+Public Function TryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
        ByRef Dict As Dictionary _
        ) As Boolean
 
-    Const RoutineName As String = Module_Name & "TableDetailsTryCopyArrayToDictionary"
+    Const RoutineName As String = Module_Name & "TryCopyArrayToDictionary"
     On Error GoTo ErrorHandler
 
-    TableDetailsTryCopyArrayToDictionary = True
+    TryCopyArrayToDictionary = True
 
     Dim I As Long
 
@@ -269,22 +295,22 @@ Public Function TableDetailsTryCopyArrayToDictionary( _
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
-            Key = Ary(I, pColumnHeaderColumn)
+            Set Record = New TableDetails_Table
 
-            If Dict.Exists(Key) Then
-                ReportWarning "Duplicate key", "Routine", RoutineName, "Key", Key
-                TableDetailsTryCopyArrayToDictionary = False
-                GoTo Done
-            Else
-                Set Record = New TableDetails_Table
+            Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
+            Record.VariableName = Ary(I, pVariableNameColumn)
+            Record.VariableType = Ary(I, pVariableTypeColumn)
+            Record.Key = Ary(I, pKeyColumn)
+            Record.Format = Ary(I, pFormatColumn)
 
-                Record.ColumnHeader = Ary(I, pColumnHeaderColumn)
-                Record.VariableName = Ary(I, pVariableNameColumn)
-                Record.VariableType = Ary(I, pVariableTypeColumn)
-                Record.Key = Ary(I, pKeyColumn)
-                Record.Format = Ary(I, pFormatColumn)
+            Key = TableDetails.CreateKey(Record)
 
+            If Not Dict.Exists(Key) Then
                 Dict.Add Key, Record
+            Else
+                ReportWarning "Duplicate key", "Routine", RoutineName, "Key", Key
+                TryCopyArrayToDictionary = False
+                GoTo Done
             End If
         Next I
 
@@ -308,7 +334,7 @@ Public Function CheckColumnHeaderExists(ByVal ColumnHeader As String) As Boolean
     Const RoutineName As String = Module_Name & "CheckColumnHeaderExists"
     On Error GoTo ErrorHandler
 
-    If Not This.Initialized Then TableDetailsInitialize
+    If Not This.Initialized Then TableDetails.Initialize
 
     If ColumnHeader = vbNullString Then
         CheckColumnHeaderExists = True
@@ -329,11 +355,11 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' CheckColumnHeaderExists
 
-Public Sub TableDetailsFormatArrayAndWorksheet( _
+Public Sub FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
     ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "TableDetailsFormatArrayAndWorksheet"
+    Const RoutineName As String = Module_Name & "%1FormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
 

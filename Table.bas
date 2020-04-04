@@ -1,6 +1,6 @@
 Attribute VB_Name = "Table"
 Option Explicit
-'@Folder "Common"
+
 Private Const Module_Name As String = "Table."
 
 Public Function TryCopyDictionaryToTable( _
@@ -49,19 +49,15 @@ Public Function TryCopyDictionaryToTable( _
             End If
         End If
     Else
-        Set ThisTbl = TableType.LocalTable
+        Set ThisTbl = Tbl
+        ClearTable ThisTbl
     End If
     
-    Dim AddressPieces As Variant
-    AddressPieces = Split(ThisTbl.HeaderRowRange.Address, ":")
-    
     Dim ThisRng As Range
-    Set ThisRng = ThisTbl.Parent.Range(AddressPieces(0))
-
+    Set ThisRng = ThisTbl.Parent.Cells(ThisTbl.HeaderRowRange.Row, ThisTbl.HeaderRowRange.Column)
+    
     ThisRng.Resize(1, TableType.HeaderWidth) = TableType.Headers
     
-    ClearTable ThisTbl
-
     Dim Ary As Variant
     ReDim Ary(1 To ThisDict.Count, 1 To TableType.HeaderWidth)
 
@@ -76,7 +72,7 @@ Public Function TryCopyDictionaryToTable( _
     ' Format the worksheet
     TableType.FormatArrayAndWorksheet Ary, ThisTbl
     
-    ' move to DatabodyRange
+    ' Move to DatabodyRange
     Set ThisRng = ThisRng.Offset(1, 0)
     ThisRng.Resize(UBound(Ary, 1), TableType.HeaderWidth) = Ary
     ThisRng.Resize(UBound(Ary, 1), TableType.HeaderWidth) = Ary ' Seems to be needed to get the column formatting right
@@ -86,8 +82,18 @@ Public Function TryCopyDictionaryToTable( _
     ThisRng.Parent.Activate
     ActiveWindow.FreezePanes = False
 
-    ThisRng.Parent.Cells(2, 1).Select
+    ThisRng.Select
     ActiveWindow.FreezePanes = True
+    
+    Dim WorkbookWithTable As String
+    WorkbookWithTable = ThisRng.Parent.Parent.Name
+    
+    If WorkbookWithTable <> ThisWorkbook.Name And Left(WorkbookWithTable, 4) <> "Book" Then
+        Dim Wkbk As Workbook
+        Set Wkbk = Workbooks(WorkbookWithTable)
+        Wkbk.Save
+        Wkbk.Close
+    End If
 
 Done:
     Exit Function
@@ -114,7 +120,7 @@ Public Function TryCopyTableToDictionary( _
 
     Dim Ary As Variant
     On Error Resume Next
-    Ary = Tbl.DataBodyRange
+    Ary = Tbl.DataBodyRange ' todo: generalize this to read from another Excel workbook and Access
     If Err.Number <> 0 Then
         ReportError "The " & TableType.LocalName & " table is empty", "Routine", RoutineName
         TryCopyTableToDictionary = False
@@ -125,9 +131,9 @@ Public Function TryCopyTableToDictionary( _
 
     Dim ThisDict As Dictionary
     If Dict Is Nothing Then
-        Set ThisDict = New Dictionary
-    Else
         Set ThisDict = TableType.LocalDictionary
+    Else
+        Set ThisDict = Dict
     End If
 
     If TableType.TryCopyArrayToDictionary(Ary, ThisDict) Then

@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-'@Folder "Common"
+
 Public Property Get HeaderWidth() As Long
 End Property
 
@@ -41,3 +41,5 @@ End Sub
 Public Property Get LocalName() As String
 End Property
 
+Public Property Get CreateKey(ByVal Record As iTable) As String
+End Property

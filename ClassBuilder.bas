@@ -3,7 +3,7 @@ Option Explicit
 '@Folder "Builder"
 Private Const Module_Name As String = "ClassBuilder."
 
-Private Type ModuleData
+Private Type PrivateData
     StreamFile As MessageFileClass
     StreamName As String
     TableName As String
@@ -13,9 +13,9 @@ Private Type ModuleData
     ExternalTableName As String
     DetailsDict As Dictionary
     BasicDict As Dictionary
-End Type ' ModuleData
+End Type ' PrivateData
 
-Private This As ModuleData
+Private This As PrivateData
 
 ' Order:
 ' Front end
@@ -32,6 +32,7 @@ Private This As ModuleData
 ' Array to Dictionary
 ' Dictionary to Array
 ' Format array and worksheet
+' CreateKey
 ' Application specific routines
 
 Public Sub ClassBuilder( _
@@ -43,6 +44,7 @@ Public Sub ClassBuilder( _
     Const RoutineName As String = Module_Name & "ClassBuilder"
     On Error GoTo ErrorHandler
     
+    ' Load PrivateType
     Set This.StreamFile = New MessageFileClass
     
     Set This.BasicDict = BasicDict
@@ -55,6 +57,7 @@ Public Sub ClassBuilder( _
     This.StreamName = This.ClassName & ".cls"
     
     This.FileName = This.BasicDict.Items(0).FileName
+    ' End of loading PrivateType
     
     Dim Line As String
     
@@ -64,7 +67,7 @@ Public Sub ClassBuilder( _
     ' Private variables
     Dim Entry As Variant
     
-    Line = PrintString("Private Type %1Type", This.TableName)
+    Line = PrintString("Private Type PrivateType")
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     For Each Entry In This.DetailsDict.Keys
@@ -74,10 +77,10 @@ Public Sub ClassBuilder( _
         This.StreamFile.WriteMessageLine Line, This.StreamName
     Next Entry
     
-    Line = PrintString("End Type" & vbCrLf, This.TableName)
+    Line = PrintString("End Type ' PrivateType" & vbCrLf, This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
-    Line = PrintString("Private This as %1Type" & vbCrLf, This.TableName)
+    Line = PrintString("Private This as PrivateType" & vbCrLf)
     This.StreamFile.WriteMessageLine Line, This.StreamName
             
     ' Application specific declarations
@@ -91,7 +94,7 @@ Public Sub ClassBuilder( _
     ' Local Dictionary
     Line = PrintString( _
         "Public Property Get iTable_LocalDictionary() As Dictionary" & vbCrLf & _
-        "    Set iTable_LocalDictionary = %1Dictionary" & vbCrLf & _
+        "    Set iTable_LocalDictionary = %1.Dict" & vbCrLf & _
         "End Property" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -99,7 +102,7 @@ Public Sub ClassBuilder( _
     ' HeaderWidth
     Line = PrintString( _
         "Public Property Get iTable_HeaderWidth() As Long" & vbCrLf & _
-        "    iTable_HeaderWidth = %1HeaderWidth" & vbCrLf & _
+        "    iTable_HeaderWidth = %1.HeaderWidth" & vbCrLf & _
         "End Property" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -107,7 +110,7 @@ Public Sub ClassBuilder( _
     ' Headers
     Line = PrintString( _
         "Public Property Get iTable_Headers() As Variant" & vbCrLf & _
-        "    iTable_Headers = %1Headers" & vbCrLf & _
+        "    iTable_Headers = %1.Headers" & vbCrLf & _
         "End Property" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -115,7 +118,7 @@ Public Sub ClassBuilder( _
     ' Get Initialized
     Line = PrintString( _
         "Public Property Get iTable_Initialized() As Boolean" & vbCrLf & _
-        "    iTable_Initialized = %1Initialized" & vbCrLf & _
+        "    iTable_Initialized = %1.Initialized" & vbCrLf & _
         "End Property" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -123,24 +126,17 @@ Public Sub ClassBuilder( _
     ' Initialize
     Line = PrintString( _
         "Public Sub iTable_Initialize()" & vbCrLf & _
-        "    %1Initialize" & vbCrLf & _
+        "    %1.Initialize" & vbCrLf & _
         "End Sub" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     ' Local Table
-    If This.FileName = vbNullString Then
-        Line = PrintString( _
-            "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
-            "    Set iTable_Localtable = %1Table" & vbCrLf & _
-            "End Property" & vbCrLf, _
-            This.TableName)
-    Else
-        Line = PrintString( _
-            "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
-            "End Property" & vbCrLf, _
-            This.TableName)
-    End If
+    Line = PrintString( _
+        "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
+        "    Set iTable_Localtable = %1.SpecificTable" & vbCrLf & _
+        "End Property" & vbCrLf, _
+        This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     ' Local Name
@@ -154,7 +150,7 @@ Public Sub ClassBuilder( _
     ' TryCopyArrayToDictionary
     Line = PrintString( _
         "Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean" & vbCrLf & _
-        "    iTable_TryCopyArrayToDictionary = %1TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
+        "    iTable_TryCopyArrayToDictionary = %1.TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
         "End Function" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -162,7 +158,7 @@ Public Sub ClassBuilder( _
     ' TryCopyDictionaryToArray
     Line = PrintString( _
         "Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean" & vbCrLf & _
-        "    iTable_TryCopyDictionaryToArray = %1TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
+        "    iTable_TryCopyDictionaryToArray = %1.TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
         "End Function" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -172,8 +168,16 @@ Public Sub ClassBuilder( _
         "Public Sub iTable_FormatArrayAndWorksheet( _" & vbCrLf & _
         "    ByRef Ary as Variant, _" & vbCrLf & _
         "    ByVal Table As ListObject)" & vbCrLf & _
-        "    %1FormatArrayAndWorksheet Ary, Table" & vbCrLf & _
+        "    %1.FormatArrayAndWorksheet Ary, Table" & vbCrLf & _
         "End Sub ' FormatArrayAndWorksheet" & vbCrLf, _
+        This.TableName)
+    This.StreamFile.WriteMessageLine Line, This.StreamName
+    
+    ' CreateKey
+    Line = PrintString( _
+        "Public Property Get iTable_CreateKey(ByVal Record As iTable) As String" & vbCrLf & _
+        "    iTable_CreateKey = %1.CreateKey(Record)" & vbCrLf & _
+        "End Property" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -191,6 +195,7 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' ClassBuilder
+
 
 Private Sub BuildFrontEnd()
 

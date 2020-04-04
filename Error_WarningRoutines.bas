@@ -1,6 +1,5 @@
 Attribute VB_Name = "Error_WarningRoutines"
 Option Explicit
-'@Folder "Common"
 ' Changes
 ' 9/15/19
 '       Changed from ErrorFilesClass to ErrorFileClass
@@ -23,19 +22,16 @@ Option Explicit
 
 Private Const Module_Name As String = "ErrorRoutines."
 
+Private pErrorFile As MessageFileClass
 Private Const pErrorStreamName As String = "Error Messages"
+
+Private pWarningFile As MessageFileClass
 Private Const pWarningStreamName As String = "Warning Messages"
 
-Private Type ErrorWarningType
-    ErrorFile As MessageFileClass
-    WarningFile As MessageFileClass
-    SourceOfError As String
-End Type
-
-Private This As ErrorWarningType
+Private SourceOfError As String
 
 Public Property Get WarningMessageFolderPath()
-    WarningMessageFolderPath = This.WarningFile.MessageFolderPath
+    WarningMessageFolderPath = pWarningFile.MessageFolderPath
 End Property
 
 Public Sub ReportWarning( _
@@ -47,8 +43,8 @@ Public Sub ReportWarning( _
     Const RoutineName As String = Module_Name & "ReportWarning"
     On Error GoTo ErrorHandler
     
-    If This.WarningFile Is Nothing Then
-        Set This.WarningFile = New MessageFileClass
+    If pWarningFile Is Nothing Then
+        Set pWarningFile = New MessageFileClass
     End If
     
     Dim WarningMessage As String
@@ -59,7 +55,7 @@ Public Sub ReportWarning( _
         WarningMessage = WarningMessage & Args(I) & " = " & Args(I + 1) & vbCrLf
     Next I
 
-    This.WarningFile.WriteMessageLine WarningMessage, pWarningStreamName
+    pWarningFile.WriteMessageLine WarningMessage, pWarningStreamName
     
 Done:
     Exit Sub
@@ -68,7 +64,7 @@ ErrorHandler:
 End Sub      ' ReportWarning
 
 Public Property Get ErrorsFound() As Boolean
-    ErrorsFound = Not This.ErrorFile Is Nothing
+    ErrorsFound = Not pErrorFile Is Nothing
 End Property
 
 Public Sub RaiseError( _
@@ -84,23 +80,23 @@ Public Sub RaiseError( _
     ' One name and value per line
 
     ' Add procedure to source
-    This.SourceOfError = This.SourceOfError & vbCrLf & proc
-    ReportError This.SourceOfError
+    SourceOfError = SourceOfError & vbCrLf & proc
+    ReportError SourceOfError
     
     ' Check if procedure where error occurs has line numbers
     ' Add error line number if present
 '    If Erl <> 0 Then
-'        This.SourceOfError = vbCrLf & "Line no: " & Erl
+'        SourceOfError = vbCrLf & "Line no: " & Erl
 '    End If
 '
 '    Dim I As Long
 '    For I = 1 To IIf(UBound(Args, 1) Mod 2 = 2, UBound(Args, 1), UBound(Args, 1) - 1) Step 2
-'        This.SourceOfError = This.SourceOfError & Args(I) & " = " & Args(I + 1) & vbCrLf
+'        SourceOfError = SourceOfError & Args(I) & " = " & Args(I + 1) & vbCrLf
 '    Next I
 
     ' If the code stops here,
     ' make sure DisplayError is placed in the top most Sub
-    Err.Raise ErrorNo, This.SourceOfError, Desc
+    Err.Raise ErrorNo, SourceOfError, Desc
 
 End Sub      ' RaiseError
 
@@ -112,7 +108,7 @@ Public Sub DisplayError(ByVal ProcName As String)
     Msg = "The following exception was raised: " & vbCrLf & _
           "Description: " & Err.Description & vbCrLf & _
           "VBA Project: " & ThisWorkbook.VBProject.Name & vbCrLf & _
-          This.SourceOfError & vbCrLf & ProcName
+          SourceOfError & vbCrLf & ProcName
 
     ReportError Msg
     
@@ -127,8 +123,8 @@ Public Sub ReportError( _
     Const RoutineName As String = Module_Name & "ReportError"
     On Error GoTo ErrorHandler
     
-    If This.ErrorFile Is Nothing Then
-        Set This.ErrorFile = New MessageFileClass
+    If pErrorFile Is Nothing Then
+        Set pErrorFile = New MessageFileClass
     End If
     
     Dim ErrorMessage As String
@@ -139,7 +135,7 @@ Public Sub ReportError( _
         ErrorMessage = ErrorMessage & Args(I) & " = " & Args(I + 1) & vbCrLf
     Next I
 
-    This.ErrorFile.WriteMessageLine ErrorMessage, pErrorStreamName
+    pErrorFile.WriteMessageLine ErrorMessage, pErrorStreamName
     
 Done:
     Exit Sub
@@ -150,9 +146,9 @@ End Sub      ' ReportError
 Public Sub CloseErrorFile()
     ' Declared as a function to keep it of the Alt-F8 list of executable routines
 
-    Set This.ErrorFile = Nothing
-    Set This.WarningFile = Nothing
-    This.SourceOfError = vbNullString
+    Set pErrorFile = Nothing
+    Set pWarningFile = Nothing
+    SourceOfError = vbNullString
 
 End Sub      ' CloseErrorFile
 

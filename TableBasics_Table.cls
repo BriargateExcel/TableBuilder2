@@ -10,18 +10,19 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 3/15/2020 10:39:08 AM
+' Built on 3/23/2020 11:18:26 AM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-Private Type TableBasicsType
+Private Type PrivateType
     TableName As String
     FileName As String
     WorksheetName As String
     ExternalTableName As String
-End Type
+    Skip As String
+End Type ' PrivateType
 
-Private This As TableBasicsType
+Private This As PrivateType
 
 ' No application specific declarations found
 
@@ -57,28 +58,36 @@ Public Property Let ExternalTableName(ByVal Param As String)
     This.ExternalTableName = Param
 End Property
 
+Public Property Get Skip() As String
+    Skip = This.Skip
+End Property
+
+Public Property Let Skip(ByVal Param As String)
+    This.Skip = Param
+End Property
+
 Public Property Get iTable_LocalDictionary() As Dictionary
-    Set iTable_LocalDictionary = TableBasicsDictionary
+    Set iTable_LocalDictionary = TableBasics.Dict
 End Property
 
 Public Property Get iTable_HeaderWidth() As Long
-    iTable_HeaderWidth = TableBasicsHeaderWidth
+    iTable_HeaderWidth = TableBasics.HeaderWidth
 End Property
 
 Public Property Get iTable_Headers() As Variant
-    iTable_Headers = TableBasicsHeaders
+    iTable_Headers = TableBasics.Headers
 End Property
 
 Public Property Get iTable_Initialized() As Boolean
-    iTable_Initialized = TableBasicsInitialized
+    iTable_Initialized = TableBasics.Initialized
 End Property
 
 Public Sub iTable_Initialize()
-    TableBasicsInitialize
+    TableBasics.Initialize
 End Sub
 
 Public Property Get iTable_LocalTable() As ListObject
-    Set iTable_LocalTable = TableBasicsTable
+    Set iTable_LocalTable = TableBasics.SpecificTable
 End Property
 
 Public Property Get iTable_LocalName() As String
@@ -86,18 +95,22 @@ Public Property Get iTable_LocalName() As String
 End Property
 
 Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
-    iTable_TryCopyArrayToDictionary = TableBasicsTryCopyArrayToDictionary(Ary, Dict)
+    iTable_TryCopyArrayToDictionary = TableBasics.TryCopyArrayToDictionary(Ary, Dict)
 End Function
 
 Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean
-    iTable_TryCopyDictionaryToArray = TableBasicsTryCopyDictionaryToArray(Dict, Ary)
+    iTable_TryCopyDictionaryToArray = TableBasics.TryCopyDictionaryToArray(Dict, Ary)
 End Function
 
 Public Sub iTable_FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
     ByVal Table As ListObject)
-    TableBasicsFormatArrayAndWorksheet Ary, Table
+    TableBasics.FormatArrayAndWorksheet Ary, Table
 End Sub ' FormatArrayAndWorksheet
+
+Public Property Get iTable_CreateKey(ByVal Record As iTable) As String
+    iTable_CreateKey = TableBasics.CreateKey(Record)
+End Property
 
 ' No application unique routines found
 
