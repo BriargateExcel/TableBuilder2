@@ -43,3 +43,13 @@ End Property
 
 Public Property Get CreateKey(ByVal Record As iTable) As String
 End Property
+
+Public Property Get IsDatabase() As Boolean
+End Property
+
+Public Property Get DatabaseName() As String
+End Property
+
+Public Property Get DatabaseTableName() As String
+End Property
+

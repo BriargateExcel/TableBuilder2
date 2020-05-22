@@ -88,7 +88,7 @@ Public Sub ModuleBuilder( _
     Line = PrintString( _
         "Public Property Get Dict() As Dictionary" & vbCrLf & _
         "   Set Dict = This.Dict" & vbCrLf & _
-        "End Property" & vbCrLf)
+        "End Property ' Dict" & vbCrLf)
     This.StreamFile.WriteMessageLine Line, This.StreamName
 
     ' Property Get Table
@@ -98,7 +98,7 @@ Public Sub ModuleBuilder( _
     Line = PrintString( _
         "Public Property Get Initialized() As Boolean" & vbCrLf & _
         "   Initialized = This.Initialized" & vbCrLf & _
-        "End Property" & vbCrLf)
+        "End Property ' Initialized" & vbCrLf)
     This.StreamFile.WriteMessageLine Line, This.StreamName
 
     ' Sub Initialize
@@ -109,14 +109,14 @@ Public Sub ModuleBuilder( _
         "Public Sub Reset()" & vbCrLf & _
         "    This.Initialized = False" & vbCrLf & _
         "    Set This.Dict = Nothing" & vbCrLf & _
-        "End Sub" & vbCrLf)
+        "End Sub ' Reset" & vbCrLf)
     This.StreamFile.WriteMessageLine Line, This.StreamName
 
     ' Property Get HeaderWidth
     Line = PrintString( _
         "Public Property Get HeaderWidth() As Long" & vbCrLf & _
         "    HeaderWidth = pHeaderWidth" & vbCrLf & _
-        "End Property" & vbCrLf)
+        "End Property ' HeaderWidth" & vbCrLf)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     ' Property Get Routines
@@ -245,7 +245,7 @@ Private Sub BuildConstantsAndProperties()
         Line = PrintString( _
             "Public Property Get %1Column() As Long" & vbCrLf & _
             "    %1Column = p%1Column" & vbCrLf & _
-            "End Property" & vbCrLf, _
+            "End Property ' %1Column" & vbCrLf, _
             This.DetailsDict.Item(Entry).VariableName)
         This.StreamFile.WriteMessageLine Line, This.StreamName
     Next Entry
@@ -285,8 +285,10 @@ Private Sub BuildDictionaryToArray()
     "        TryCopyDictionaryToArray = False" & vbCrLf & _
     "        GoTo Done" & vbCrLf & _
     "    End If" & vbCrLf & vbCrLf & _
+    "    ReDim Ary(1 To Dict.Count, 1 To %2)" & vbCrLf & vbCrLf & _
     "    Dim I As Long" & vbCrLf & _
-    "    I = 1" & vbCrLf)
+    "    I = 1" & vbCrLf, _
+    This.ClassName, CStr(This.DetailsDict.Count))
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     Line = PrintString( _
@@ -372,7 +374,7 @@ Private Sub BuildColumnConstants()
     End If
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
-    Line = "End Property" & vbCrLf
+    Line = "End Property ' Headers" & vbCrLf
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
 Done:
@@ -604,7 +606,7 @@ Private Sub BuildInitialize()
         "    Set LocalTable = New %2" & vbCrLf & _
         vbCrLf & _
         "    Set This.Dict = New Dictionary" & vbCrLf & _
-        "    If Table.TryCopyTableToDictionary(LocalTable, %1.SpecificTable, This.Dict) Then" & vbCrLf & _
+        "    If Table.TryCopyTableToDictionary(LocalTable, This.Dict, %1.SpecificTable) Then" & vbCrLf & _
         "        This.Initialized = True" & vbCrLf & _
         "    Else" & vbCrLf & _
         "        ReportError qqError copying %1 tableqq, qqRoutineqq, RoutineName" & vbCrLf & _
@@ -713,7 +715,7 @@ Private Sub BuildArrayToRecord()
         "            End If" & vbCrLf & _
         "        Next I" & vbCrLf & vbCrLf & _
         "    Else" & vbCrLf & _
-        "        Dict.Add Ary, Ary" & vbCrLf & _
+        "        ReportError qqInvalid Arrayqq, qqRoutineqq, RoutineName" & vbCrLf & _
         "    End If" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
@@ -901,9 +903,9 @@ Private Sub BuildGetTable()
             "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
             "    ' Table in this workbook" & vbCrLf & _
             "    Set SpecificTable = %1Sheet.ListObjects(qq%1Tableqq)" & vbCrLf & _
-            "End Property" & vbCrLf, _
+            "End Property ' SpecificTable" & vbCrLf, _
             This.TableName)
-    Else
+    ElseIf Right(This.FileName, 5) = ".xls?" Then
         Line = PrintString( _
             "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
             "    ' Table not in this workbook" & vbCrLf & _
@@ -916,7 +918,21 @@ Private Sub BuildGetTable()
             "    Set Wksht = This.Wkbk.Worksheets(qq%2qq)" & vbCrLf & _
             vbCrLf & _
             "    Set SpecificTable = Wksht.ListObjects(qq%3qq)" & vbCrLf & _
-            "End Property" & vbCrLf, _
+            "End Property ' SpecificTable" & vbCrLf, _
+            This.FileName, This.WorksheetName, This.ExternalTableName)
+    ElseIf Right(This.FileName, 6) = ".accdb" Then
+        Line = PrintString( _
+            "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
+            "    ' This is a database table" & vbCrLf & _
+            "    Set SpecificTable = Nothing" & vbCrLf & _
+            "End Property ' SpecificTable" & vbCrLf, _
+            This.FileName, This.WorksheetName, This.ExternalTableName)
+    ElseIf This.FileName = "Blank" Then
+        Line = PrintString( _
+            "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
+            "    ' This table is handled in other ways" & vbCrLf & _
+            "    Set SpecificTable = Nothing" & vbCrLf & _
+            "End Property ' SpecificTable" & vbCrLf, _
             This.FileName, This.WorksheetName, This.ExternalTableName)
     End If
     This.StreamFile.WriteMessageLine Line, This.StreamName

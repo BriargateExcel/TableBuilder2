@@ -95,7 +95,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_LocalDictionary() As Dictionary" & vbCrLf & _
         "    Set iTable_LocalDictionary = %1.Dict" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' LocalDictionary" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -103,7 +103,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_HeaderWidth() As Long" & vbCrLf & _
         "    iTable_HeaderWidth = %1.HeaderWidth" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' HeaderWidth" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -111,7 +111,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_Headers() As Variant" & vbCrLf & _
         "    iTable_Headers = %1.Headers" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' Headers" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -119,7 +119,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_Initialized() As Boolean" & vbCrLf & _
         "    iTable_Initialized = %1.Initialized" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' Initialized" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -127,7 +127,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Sub iTable_Initialize()" & vbCrLf & _
         "    %1.Initialize" & vbCrLf & _
-        "End Sub" & vbCrLf, _
+        "End Sub ' Initialize" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -135,7 +135,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_LocalTable() As ListObject" & vbCrLf & _
         "    Set iTable_Localtable = %1.SpecificTable" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' LocalTable" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -143,7 +143,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_LocalName() As String" & vbCrLf & _
         "    iTable_LocalName = qq%1qq" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' LocalName" & vbCrLf, _
         This.ClassName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -151,7 +151,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean" & vbCrLf & _
         "    iTable_TryCopyArrayToDictionary = %1.TryCopyArrayToDictionary(Ary, Dict)" & vbCrLf & _
-        "End Function" & vbCrLf, _
+        "End Function ' TryCopyArrayToDictionary" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -159,7 +159,7 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean" & vbCrLf & _
         "    iTable_TryCopyDictionaryToArray = %1.TryCopyDictionaryToArray(Dict, Ary)" & vbCrLf & _
-        "End Function" & vbCrLf, _
+        "End Function ' TryCopyDictionaryToArray" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
@@ -177,10 +177,38 @@ Public Sub ClassBuilder( _
     Line = PrintString( _
         "Public Property Get iTable_CreateKey(ByVal Record As iTable) As String" & vbCrLf & _
         "    iTable_CreateKey = %1.CreateKey(Record)" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' CreateKey" & vbCrLf, _
         This.TableName)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
+    ' IsDictionary function
+    Dim DatabaseExists As String
+    DatabaseExists = IIf(Right(This.FileName, 6) = ".accdb", "True", "False")
+    
+    Line = PrintString( _
+        "Public Property Get iTable_IsDatabase() As Boolean" & vbCrLf & _
+        "    iTable_IsDatabase = %1" & vbCrLf & _
+        "End Property ' IsDictionary" & vbCrLf, _
+        DatabaseExists)
+    This.StreamFile.WriteMessageLine Line, This.StreamName
+    
+    ' Database Name
+    Line = PrintString( _
+        "Public Property Get iTable_DatabaseName() As String" & vbCrLf & _
+        "    iTable_DatabaseName = qq%1qq" & vbCrLf & _
+        "End Property ' DatabaseName" & vbCrLf, _
+        This.FileName)
+    This.StreamFile.WriteMessageLine Line, This.StreamName
+    
+    ' Database Table Name
+    Line = PrintString( _
+        "Public Property Get iTable_DatabaseTableName() As String" & vbCrLf & _
+        "    iTable_DatabaseTableName = qq%1qq" & vbCrLf & _
+        "End Property ' DatabaseTableName" & vbCrLf, _
+        This.TableName)
+    This.StreamFile.WriteMessageLine Line, This.StreamName
+    
+    ' Add any unique code
     BuildApplicationUniqueRoutines This.StreamFile, This.StreamName, This.TableName, ".cls"
     
     ' Wrapup
@@ -248,14 +276,14 @@ Private Sub BuildProperties(ByVal Record As TableDetails_Table)
     Line = PrintString( _
         "Public Property Get %1() as %2" & vbCrLf & _
         "    %1 = This.%1" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' %1" & vbCrLf, _
         Record.VariableName, Record.VariableType)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     
     Line = PrintString( _
         "Public Property Let %1(ByVal Param as %2)" & vbCrLf & _
         "    This.%1 = Param" & vbCrLf & _
-        "End Property" & vbCrLf, _
+        "End Property ' %1" & vbCrLf, _
         Record.VariableName, Record.VariableType)
     This.StreamFile.WriteMessageLine Line, This.StreamName
     

@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 3/23/2020 11:18:26 AM
+' Built on 4/9/2020 4:36:21 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -30,43 +30,43 @@ Private Const pExternalTableName As String = vbNullString
 
 Public Property Get ColumnHeaderColumn() As Long
     ColumnHeaderColumn = pColumnHeaderColumn
-End Property
+End Property ' ColumnHeaderColumn
 
 Public Property Get VariableNameColumn() As Long
     VariableNameColumn = pVariableNameColumn
-End Property
+End Property ' VariableNameColumn
 
 Public Property Get VariableTypeColumn() As Long
     VariableTypeColumn = pVariableTypeColumn
-End Property
+End Property ' VariableTypeColumn
 
 Public Property Get KeyColumn() As Long
     KeyColumn = pKeyColumn
-End Property
+End Property ' KeyColumn
 
 Public Property Get FormatColumn() As Long
     FormatColumn = pFormatColumn
-End Property
+End Property ' FormatColumn
 
 Public Property Get Headers() As Variant
     Headers = Array( _
         "Column Header", "Variable Name", _
         "Type", "Key", _
         "Format")
-End Property
+End Property ' Headers
 
 Public Property Get Dict() As Dictionary
    Set Dict = This.Dict
-End Property
+End Property ' Dict
 
 Public Property Get SpecificTable() As ListObject
     ' Table in this workbook
     Set SpecificTable = TableDetailsSheet.ListObjects("TableDetailsTable")
-End Property
+End Property ' SpecificTable
 
 Public Property Get Initialized() As Boolean
    Initialized = This.Initialized
-End Property
+End Property ' Initialized
 
 Public Sub Initialize()
 
@@ -77,7 +77,7 @@ Public Sub Initialize()
     Set LocalTable = New TableDetails_Table
 
     Set This.Dict = New Dictionary
-    If Table.TryCopyTableToDictionary(LocalTable, TableDetails.SpecificTable, This.Dict) Then
+    If Table.TryCopyTableToDictionary(LocalTable, This.Dict, TableDetails.SpecificTable) Then
         This.Initialized = True
     Else
         ReportError "Error copying TableDetails table", "Routine", RoutineName
@@ -100,11 +100,11 @@ End Sub ' TableDetailsInitialize
 Public Sub Reset()
     This.Initialized = False
     Set This.Dict = Nothing
-End Sub
+End Sub ' Reset
 
 Public Property Get HeaderWidth() As Long
     HeaderWidth = pHeaderWidth
-End Property
+End Property ' HeaderWidth
 
 Public Property Get GetVariableNameFromColumnHeader(ByVal ColumnHeader As String) As String
 
@@ -315,7 +315,7 @@ Public Function TryCopyArrayToDictionary( _
         Next I
 
     Else
-        Dict.Add Ary, Ary
+        ReportError "Invalid Array", "Routine", RoutineName
     End If
 
 Done:
@@ -359,7 +359,7 @@ Public Sub FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
     ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "%1FormatArrayAndWorksheet"
+    Const RoutineName As String = Module_Name & "TableDetailsFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
 

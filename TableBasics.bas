@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 3/23/2020 11:18:26 AM
+' Built on 4/9/2020 4:36:21 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -30,43 +30,43 @@ Private Const pExternalTableName As String = vbNullString
 
 Public Property Get TableNameColumn() As Long
     TableNameColumn = pTableNameColumn
-End Property
+End Property ' TableNameColumn
 
 Public Property Get FileNameColumn() As Long
     FileNameColumn = pFileNameColumn
-End Property
+End Property ' FileNameColumn
 
 Public Property Get WorksheetNameColumn() As Long
     WorksheetNameColumn = pWorksheetNameColumn
-End Property
+End Property ' WorksheetNameColumn
 
 Public Property Get ExternalTableNameColumn() As Long
     ExternalTableNameColumn = pExternalTableNameColumn
-End Property
+End Property ' ExternalTableNameColumn
 
 Public Property Get SkipColumn() As Long
     SkipColumn = pSkipColumn
-End Property
+End Property ' SkipColumn
 
 Public Property Get Headers() As Variant
     Headers = Array( _
         "Table Name", "File Name", _
         "Worksheet Name", "External Table Name", _
         "Skip")
-End Property
+End Property ' Headers
 
 Public Property Get Dict() As Dictionary
    Set Dict = This.Dict
-End Property
+End Property ' Dict
 
 Public Property Get SpecificTable() As ListObject
     ' Table in this workbook
     Set SpecificTable = TableBasicsSheet.ListObjects("TableBasicsTable")
-End Property
+End Property ' SpecificTable
 
 Public Property Get Initialized() As Boolean
    Initialized = This.Initialized
-End Property
+End Property ' Initialized
 
 Public Sub Initialize()
 
@@ -77,7 +77,7 @@ Public Sub Initialize()
     Set LocalTable = New TableBasics_Table
 
     Set This.Dict = New Dictionary
-    If Table.TryCopyTableToDictionary(LocalTable, TableBasics.SpecificTable, This.Dict) Then
+    If Table.TryCopyTableToDictionary(LocalTable, This.Dict, TableBasics.SpecificTable) Then
         This.Initialized = True
     Else
         ReportError "Error copying TableBasics table", "Routine", RoutineName
@@ -100,11 +100,11 @@ End Sub ' TableBasicsInitialize
 Public Sub Reset()
     This.Initialized = False
     Set This.Dict = Nothing
-End Sub
+End Sub ' Reset
 
 Public Property Get HeaderWidth() As Long
     HeaderWidth = pHeaderWidth
-End Property
+End Property ' HeaderWidth
 
 Public Function CreateKey(ByVal Record As TableBasics_Table) As String
 
@@ -207,7 +207,7 @@ Public Function TryCopyArrayToDictionary( _
         Next I
 
     Else
-        Dict.Add Ary, Ary
+        ReportError "Invalid Array", "Routine", RoutineName
     End If
 
 Done:
@@ -225,7 +225,7 @@ Public Sub FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
     ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "%1FormatArrayAndWorksheet"
+    Const RoutineName As String = Module_Name & "TableBasicsFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
 

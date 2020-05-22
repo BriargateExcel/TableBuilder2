@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 Implements iTable
 
-' Built on 3/23/2020 11:18:26 AM
+' Built on 4/9/2020 4:36:21 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -28,79 +28,79 @@ Private This As PrivateType
 
 Public Property Get TableName() As String
     TableName = This.TableName
-End Property
+End Property ' TableName
 
 Public Property Let TableName(ByVal Param As String)
     This.TableName = Param
-End Property
+End Property ' TableName
 
 Public Property Get FileName() As String
     FileName = This.FileName
-End Property
+End Property ' FileName
 
 Public Property Let FileName(ByVal Param As String)
     This.FileName = Param
-End Property
+End Property ' FileName
 
 Public Property Get WorksheetName() As String
     WorksheetName = This.WorksheetName
-End Property
+End Property ' WorksheetName
 
 Public Property Let WorksheetName(ByVal Param As String)
     This.WorksheetName = Param
-End Property
+End Property ' WorksheetName
 
 Public Property Get ExternalTableName() As String
     ExternalTableName = This.ExternalTableName
-End Property
+End Property ' ExternalTableName
 
 Public Property Let ExternalTableName(ByVal Param As String)
     This.ExternalTableName = Param
-End Property
+End Property ' ExternalTableName
 
 Public Property Get Skip() As String
     Skip = This.Skip
-End Property
+End Property ' Skip
 
 Public Property Let Skip(ByVal Param As String)
     This.Skip = Param
-End Property
+End Property ' Skip
 
 Public Property Get iTable_LocalDictionary() As Dictionary
     Set iTable_LocalDictionary = TableBasics.Dict
-End Property
+End Property ' LocalDictionary
 
 Public Property Get iTable_HeaderWidth() As Long
     iTable_HeaderWidth = TableBasics.HeaderWidth
-End Property
+End Property ' HeaderWidth
 
 Public Property Get iTable_Headers() As Variant
     iTable_Headers = TableBasics.Headers
-End Property
+End Property ' Headers
 
 Public Property Get iTable_Initialized() As Boolean
     iTable_Initialized = TableBasics.Initialized
-End Property
+End Property ' Initialized
 
 Public Sub iTable_Initialize()
     TableBasics.Initialize
-End Sub
+End Sub ' Initialize
 
 Public Property Get iTable_LocalTable() As ListObject
     Set iTable_LocalTable = TableBasics.SpecificTable
-End Property
+End Property ' LocalTable
 
 Public Property Get iTable_LocalName() As String
     iTable_LocalName = "TableBasics_Table"
-End Property
+End Property ' LocalName
 
 Public Function iTable_TryCopyArrayToDictionary(ByVal Ary As Variant, ByRef Dict As Dictionary) As Boolean
     iTable_TryCopyArrayToDictionary = TableBasics.TryCopyArrayToDictionary(Ary, Dict)
-End Function
+End Function ' TryCopyArrayToDictionary
 
 Public Function iTable_TryCopyDictionaryToArray(ByVal Dict As Dictionary, ByRef Ary As Variant) As Boolean
     iTable_TryCopyDictionaryToArray = TableBasics.TryCopyDictionaryToArray(Dict, Ary)
-End Function
+End Function ' TryCopyDictionaryToArray
 
 Public Sub iTable_FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
@@ -110,7 +110,19 @@ End Sub ' FormatArrayAndWorksheet
 
 Public Property Get iTable_CreateKey(ByVal Record As iTable) As String
     iTable_CreateKey = TableBasics.CreateKey(Record)
-End Property
+End Property ' CreateKey
+
+Public Property Get iTable_IsDatabase() As Boolean
+    iTable_IsDatabase = False
+End Property ' IsDictionary
+
+Public Property Get iTable_DatabaseName() As String
+    iTable_DatabaseName = ""
+End Property ' DatabaseName
+
+Public Property Get iTable_DatabaseTableName() As String
+    iTable_DatabaseTableName = "TableBasics"
+End Property ' DatabaseTableName
 
 ' No application unique routines found
 

@@ -30,13 +30,13 @@ Public Sub BuildModules()
             Set DetailsTable = Sheet.ListObjects(1)
         End If
         
-        If Table.TryCopyTableToDictionary(TableBasics, BasicsTable, BasicDict) Then
+        If Table.TryCopyTableToDictionary(TableBasics, BasicDict, BasicsTable) Then
             ' Success; do nothing
         Else
             ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
         End If
         
-        If Table.TryCopyTableToDictionary(TableDetails, DetailsTable, DetailsDict) Then
+        If Table.TryCopyTableToDictionary(TableDetails, DetailsDict, DetailsTable) Then
             ' Success; do nothing
         Else
             ReportError "Error copying Table to dictionary", "Routine", RoutineName
