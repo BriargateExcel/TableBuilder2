@@ -1035,8 +1035,6 @@ Private Function BuildKey() As String
     Const RoutineName As String = Module_Name & "BuildCreateKeyFunction"
     On Error GoTo ErrorHandler
     
-    Dim Line As String
-    
     If UBound(This.KeyArray, 1) = 1 Or This.KeyArray(1) = "None" Then
         BuildKey = BuildNoneOrOneKey
     Else

@@ -21,30 +21,32 @@ Public Sub BuildModules()
     Set TableDetails = New TableDetails_Table
     
     For Each Sheet In ThisWorkbook.Worksheets
-        Set BasicsTable = Sheet.ListObjects(2)
-        If BasicsTable.HeaderRowRange(1, 1) <> "Table Name" Then
-            Set BasicsTable = Sheet.ListObjects(1)
-            Set DetailsTable = Sheet.ListObjects(2)
-        Else
+        If Sheet.Name <> "VBA Make File" Then
             Set BasicsTable = Sheet.ListObjects(2)
-            Set DetailsTable = Sheet.ListObjects(1)
+            If BasicsTable.HeaderRowRange(1, 1) <> "Table Name" Then
+                Set BasicsTable = Sheet.ListObjects(1)
+                Set DetailsTable = Sheet.ListObjects(2)
+            Else
+                Set BasicsTable = Sheet.ListObjects(2)
+                Set DetailsTable = Sheet.ListObjects(1)
+            End If
+            
+            If Table.TryCopyTableToDictionary(TableBasics, BasicDict, BasicsTable) Then
+                ' Success; do nothing
+            Else
+                ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
+            End If
+            
+            If Table.TryCopyTableToDictionary(TableDetails, DetailsDict, DetailsTable) Then
+                ' Success; do nothing
+            Else
+                ReportError "Error copying Table to dictionary", "Routine", RoutineName
+            End If
+            
+            ClassBuilder.ClassBuilder DetailsDict, BasicDict
+            
+            ModuleBuilder.ModuleBuilder DetailsDict, BasicDict
         End If
-        
-        If Table.TryCopyTableToDictionary(TableBasics, BasicDict, BasicsTable) Then
-            ' Success; do nothing
-        Else
-            ReportError "Error copying TableBasics to dictionary", "Routine", RoutineName
-        End If
-        
-        If Table.TryCopyTableToDictionary(TableDetails, DetailsDict, DetailsTable) Then
-            ' Success; do nothing
-        Else
-            ReportError "Error copying Table to dictionary", "Routine", RoutineName
-        End If
-        
-        ClassBuilder.ClassBuilder DetailsDict, BasicDict
-        
-        ModuleBuilder.ModuleBuilder DetailsDict, BasicDict
     Next Sheet
 
     MsgBox "Files built", vbOKOnly

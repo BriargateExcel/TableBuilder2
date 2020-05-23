@@ -1,5 +1,7 @@
 Attribute VB_Name = "Table"
 Option Explicit
+' 2020-04-08
+'   Added capability to read/write to/from an access database
 
 Private Const Module_Name As String = "Table."
 
@@ -9,7 +11,8 @@ Public Function TryCopyDictionaryToTable( _
     Optional ByVal Tbl As ListObject = Nothing, _
     Optional ByVal Rng As Range = Nothing, _
     Optional ByVal TableName As String = vbNullString, _
-    Optional CopyToTableRegardless As Boolean = False _
+    Optional CopyToTableRegardless As Boolean = False, _
+    Optional ByVal KeepWorkbookOpen As Boolean = True _
     ) As Boolean
     ' This routine copies a dictionary to an Excel table or a database
     ' If Dict is nothing then use TableType.LocalDictionary
@@ -19,7 +22,9 @@ Public Function TryCopyDictionaryToTable( _
     ' If Tbl and Rng are both Nothing then use TableType.LocalTable
     '
     ' CopyToTableRegardless = True forces copying to an Excel table
-    '   regardless of whether there is an associated database'
+    '   regardless of whether there is an associated database
+    '
+    ' KeepWorkbookOpen = True avoids the workbook close in TryCopyDictionaryToExcelTable
 
     Const RoutineName As String = Module_Name & "CopyDictionaryToTable"
     On Error GoTo ErrorHandler
@@ -27,21 +32,31 @@ Public Function TryCopyDictionaryToTable( _
     TryCopyDictionaryToTable = True
     
     If TableType.IsDatabase And Not CopyToTableRegardless Then
-        If TryCopyDictionaryToDatabase(TableType, Dict, TableType.DatabaseName, TableType.DatabaseTableName) Then
+        Dim Ary As Variant
+        
+        If TableType.TryCopyDictionaryToArray(Dict, Ary) Then
+        Else
+            ReportError "Error copying dictionary to array", "Routine", RoutineName
+            TryCopyDictionaryToTable = False
+            GoTo Done
+        End If
+        
+        If TryCopyArrayToDatabase( _
+            Ary, TableType.DatabaseName, TableType.DatabaseTableName, False) _
+        Then
         Else
             ReportError "Error copying dictionary to database", "Routine", RoutineName
             TryCopyDictionaryToTable = False
             GoTo Done
         End If
     Else
-        If TryCopyDictionaryToExcelTable(TableType, Dict, Tbl, Rng, TableName) Then
+        If TryCopyDictionaryToExcelTable(TableType, Dict, Tbl, Rng, TableName, KeepWorkbookOpen) Then
         Else
             ReportError "Error copying dictionary to Excel Table", "Routine", RoutineName
             TryCopyDictionaryToTable = False
             GoTo Done
         End If
     End If
-
 
 Done:
     Exit Function
@@ -53,78 +68,23 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TryCopyDictionaryToTable
 
-Private Function TryCopyDictionaryToDatabase( _
-    ByVal TableType As iTable, _
-    ByVal Dict As Dictionary, _
-    ByVal DatabasePath As String, _
-    ByVal DatabaseTableName As String _
-    ) As Boolean
-    
-    ' Used to return a boolean and some other value(s)
-    ' Returns True if successful
-
-    Const RoutineName As String = Module_Name & "TryCopyDictionaryToDatabase"
-    On Error GoTo ErrorHandler
-    
-    TryCopyDictionaryToDatabase = True
-    
-    Dim Ary As Variant
-    ReDim Ary(1 To Dict.Count, 1 To TableType.HeaderWidth)
-    
-    If TableType.TryCopyDictionaryToArray(Dict, Ary) Then
-    Else
-        ReportError "Error coyping dictionary to array", "Routine", RoutineName
-        TryCopyDictionaryToDatabase = False
-        GoTo Done
-    End If
-    
-    Dim DB As Database
-    Set DB = OpenDatabase(DatabasePath)
-    
-    Dim SQLQuery As String
-    SQLQuery = "DELETE " & DatabaseTableName & ".* FROM " & DatabaseTableName
-    
-    DB.Execute SQLQuery
-    
-    Dim RS As Recordset
-    Set RS = DB.OpenRecordset(DatabaseTableName)
-    
-    Dim I As Long
-    Dim J As Long
-    For I = 1 To UBound(Ary, 1)
-        RS.AddNew
-        For J = 1 To UBound(Ary, 2)
-            RS.Fields(J - 1) = Ary(I, J)
-        Next J
-        RS.Update
-    Next I
-    
-    RS.Close
-    
-    DB.Close
-    
-Done:
-    Exit Function
-ErrorHandler:
-    RS.Close
-    DB.Close
-    ReportError "Exception raised", _
-                "Routine", RoutineName, _
-                "Error Number", Err.Number, _
-                "Error Description", Err.Description
-    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TryCopyDictionaryToDatabase
-
 Private Function TryCopyDictionaryToExcelTable( _
     ByVal TableType As iTable, _
     ByVal Dict As Dictionary, _
     Optional ByVal Tbl As ListObject = Nothing, _
     Optional ByVal Rng As Range = Nothing, _
-    Optional ByVal TableName As String = vbNullString _
+    Optional ByVal TableName As String = vbNullString, _
+    Optional ByVal KeepWorkbookOpen As Boolean = True _
     ) As Boolean
     
-    ' Used to return a boolean and some other value(s)
-    ' Returns True if successful
+    ' This routine copies a dictionary to an Excel table
+    ' If Dict is nothing then use TableType.LocalDictionary
+    '
+    ' If Tbl is nothing then build a table using Rng and TableName
+    '
+    ' If Tbl and Rng are both Nothing then use TableType.LocalTable
+    '
+    ' KeepWorkbookOpen = True avoids the workbook close
 
     Const RoutineName As String = Module_Name & "TryCopyDictionaryToExcelTable"
     On Error GoTo ErrorHandler
@@ -164,7 +124,7 @@ Private Function TryCopyDictionaryToExcelTable( _
     End If
     
     Dim ThisRng As Range
-    Set ThisRng = ThisTbl.Parent.Cells(ThisTbl.HeaderRowRange.Row, ThisTbl.HeaderRowRange.Column)
+    Set ThisRng = ThisTbl.HeaderRowRange
     
     ThisRng.Resize(1, TableType.HeaderWidth) = TableType.Headers
     
@@ -192,13 +152,13 @@ Private Function TryCopyDictionaryToExcelTable( _
     ThisRng.Parent.Activate
     ActiveWindow.FreezePanes = False
 
-    ThisRng.Select
+    ThisTbl.DataBodyRange(1, 1).Select
     ActiveWindow.FreezePanes = True
     
     Dim WorkbookWithTable As String
     WorkbookWithTable = ThisRng.Parent.Parent.Name
     
-    If WorkbookWithTable <> ThisWorkbook.Name And Left(WorkbookWithTable, 4) <> "Book" Then
+    If Not KeepWorkbookOpen Then
         Dim Wkbk As Workbook
         Set Wkbk = Workbooks(WorkbookWithTable)
         Wkbk.Save
@@ -218,7 +178,8 @@ End Function ' TryCopyDictionaryToExcelTable
 Public Function TryCopyTableToDictionary( _
     ByVal TableType As iTable, _
     ByRef Dict As Dictionary, _
-    Optional ByVal Tbl As ListObject = Nothing _
+    ByVal Tbl As ListObject, _
+    Optional ByVal ReadFromDatabase As Boolean = True _
     ) As Boolean
 
     ' Copies a table to a dictionary
@@ -230,7 +191,7 @@ Public Function TryCopyTableToDictionary( _
     
     Dim Ary As Variant
     
-    If TableType.IsDatabase Then
+    If TableType.IsDatabase And ReadFromDatabase Then
         If TryReadDatabaseToArray(TableType.DatabaseName, TableType.DatabaseTableName, Ary) Then
         Else
             ReportError "Error copying database to array", _
@@ -309,11 +270,13 @@ ErrorHandler:
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TryCopyExcelTableToArray
 
-Private Function TryReadDatabaseToArray( _
-    ByVal DatabasePath As String, _
+Public Function TryReadDatabaseToArray( _
+    ByVal DatabaseName As String, _
     ByVal DatabaseTableName As String, _
-    ByRef Ary As Variant _
+    ByRef Ary As Variant, _
+    Optional ByRef FieldNames As Variant _
     ) As Boolean
+    
 ' https://docs.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/recordset-object-dao
 ' This example demonstrates Recordset objects and the Recordsets collection
 ' by opening four different types of Recordsets,
@@ -328,18 +291,28 @@ Private Function TryReadDatabaseToArray( _
     Dim DB As Database
     Dim RS As Recordset
     
-    Set DB = OpenDatabase(DatabasePath)
+'    Set DB = OpenDatabase(GetDataFilesFolder & Application.PathSeparator & DatabaseName)
     
     Set RS = DB.OpenRecordset(DatabaseTableName, dbOpenTable)
     
-    If RS.RecordCount = 0 Then
-        ReDim Ary(1 To 1, 1 To RS.Fields.Count)
-    Else
-        ReDim Ary(1 To RS.RecordCount, 1 To RS.Fields.Count)
-    End If
-    
     
     Dim I As Long
+    
+    If RS.RecordCount = 0 Then
+        ' I had to do this because RS.RecordCount=0 even though there were 1,000s of records
+        I = 0
+        RS.MoveFirst
+        Do While Not RS.EOF
+            RS.MoveNext
+            I = I + 1
+        Loop
+    Else
+        I = RS.RecordCount
+    End If
+    RS.MoveFirst
+    
+    ReDim Ary(1 To I, 1 To RS.Fields.Count)
+    
     I = 1
     
     Dim J As Long
@@ -356,11 +329,20 @@ Private Function TryReadDatabaseToArray( _
         RS.MoveNext
         I = I + 1
     Loop
+    
+    ReDim FieldNames(1 To RS.Fields.Count)
+    
+    Dim Fld As DAO.Field
+    I = 1
+    For Each Fld In RS.Fields
+        FieldNames(I) = Fld.Name
+        I = I + 1
+    Next Fld
             
     RS.Close
     
     DB.Close
- 
+
 Done:
     Exit Function
 ErrorHandler:
@@ -370,42 +352,67 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' TryReadDatabaseToArray
-'
-'Public Sub MainProgram()
-'
-'    ' Used as the top level routine
-'
-'    Const RoutineName As String = Module_Name & "MainProgram"
-'    On Error GoTo ErrorHandler
-'
-'    Dim Ary As Variant
-'
-'    TryReadDatabaseToArray TableType.DatabaseName, TableType.DatabaseTableName, Ary
-'
-'    Dim Dict As Dictionary
-'    ControlAccounts.TryCopyArrayToDictionary Ary, Dict
-'
-'    Dim ControlAccountsTable As ControlAccounts_Table
-'    Set ControlAccountsTable = New ControlAccounts_Table
-'    TryCopyDictionaryToDatabase ControlAccountsTable, Dict, TableType.DatabaseName, TableType.DatabaseTableName
-'
-'Done:
-'    MsgBox "Normal exit", vbOKOnly
-'    GoTo Done2
-'Halted:
-'    ' Use the Halted exit point after giving the user a message
-'    '   describing why processing did not run to completion
-'    MsgBox "Abnormal exit"
-'Done2:
-'    CloseErrorFile
-'    TurnOnAutomaticProcessing
-'    Exit Sub
-'ErrorHandler:
-'    ReportError "Exception raised", _
-'                "Routine", RoutineName, _
-'                "Error Number", Err.Number, _
-'                "Error Description", Err.Description
-'    TurnOnAutomaticProcessing
-'    CloseErrorFile
-'End Sub ' MainProgram
-'
+
+Public Function TryCopyArrayToDatabase( _
+    ByVal Ary As Variant, _
+    ByVal DatabaseName As String, _
+    ByVal DatabaseTableName As String, _
+    Optional ByVal FieldNamesInFirstRow As Boolean = False _
+    ) As Boolean
+
+    ' Copies a dictionary to its corresponding database table
+    ' Assumes the first row of the array contains the field names
+
+    Const RoutineName As String = Module_Name & "TryCopyArrayToDatabase"
+    On Error GoTo ErrorHandler
+
+    TryCopyArrayToDatabase = True
+
+    If UBound(Ary, 1) = 0 Then GoTo Done
+
+    Dim DB As Database
+'    Set DB = OpenDatabase(GetDataFilesFolder & Application.PathSeparator & DatabaseName)
+
+    Dim SQLQuery As String
+    SQLQuery = "DELETE " & DatabaseTableName & ".* FROM " & DatabaseTableName
+
+    DB.Execute SQLQuery
+
+    Dim RS As Recordset
+    Set RS = DB.OpenRecordset(DatabaseTableName)
+    
+    Dim I As Long
+    Dim J As Long
+    Dim FirstRow As Long
+    Dim FieldNumber As Long
+    
+    FirstRow = IIf(FieldNamesInFirstRow, LBound(Ary, 1) + 1, LBound(Ary, 1))
+    
+    For I = FirstRow To UBound(Ary, 1)
+        RS.AddNew
+        FieldNumber = 0
+        For J = LBound(Ary, 2) To UBound(Ary, 2)
+            RS.Fields(FieldNumber) = Ary(I, J)
+            FieldNumber = FieldNumber + 1
+        Next J
+        RS.Update
+    Next I
+
+    RS.Close
+    
+    DB.Close
+
+Done:
+    Exit Function
+ErrorHandler:
+    RS.Close
+    DB.Close
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Function ' TryCopyArrayToDatabase
+
+
+

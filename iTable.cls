@@ -8,6 +8,9 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+' 2020-04-08
+'   Added 3 database related routines to support
+'   the capability to read/write to/from an access database
 
 Public Property Get HeaderWidth() As Long
 End Property
@@ -52,4 +55,5 @@ End Property
 
 Public Property Get DatabaseTableName() As String
 End Property
+
 

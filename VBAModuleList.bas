@@ -1,11 +1,11 @@
-Attribute VB_Name = "TableBasics"
+Attribute VB_Name = "VBAModuleList"
 Option Explicit
 
-' Built on 4/9/2020 4:36:21 PM
+' Built on 5/22/2020 4:05:43 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
-Private Const Module_Name As String = "TableBasics."
+Private Const Module_Name As String = "VBAModuleList."
 
 Private Type PrivateType
     Initialized As Boolean
@@ -17,38 +17,26 @@ Private This As PrivateType
 
 ' No application specific declarations found
 
-Private Const pTableNameColumn As Long = 1
-Private Const pFileNameColumn As Long = 2
-Private Const pWorksheetNameColumn As Long = 3
-Private Const pExternalTableNameColumn As Long = 4
-Private Const pSkipColumn As Long = 5
-Private Const pHeaderWidth As Long = 5
+Private Const pModuleColumn As Long = 1
+Private Const pExtraColumn As Long = 2
+Private Const pHeaderWidth As Long = 2
 
-Public Property Get TableNameColumn() As Long
-    TableNameColumn = pTableNameColumn
-End Property ' TableNameColumn
+Private Const pFileName As String = "Blank"
+Private Const pWorksheetName As String = vbNullString
+Private Const pExternalTableName As String = vbNullString
 
-Public Property Get FileNameColumn() As Long
-    FileNameColumn = pFileNameColumn
-End Property ' FileNameColumn
+Public Property Get ModuleColumn() As Long
+    ModuleColumn = pModuleColumn
+End Property ' ModuleColumn
 
-Public Property Get WorksheetNameColumn() As Long
-    WorksheetNameColumn = pWorksheetNameColumn
-End Property ' WorksheetNameColumn
-
-Public Property Get ExternalTableNameColumn() As Long
-    ExternalTableNameColumn = pExternalTableNameColumn
-End Property ' ExternalTableNameColumn
-
-Public Property Get SkipColumn() As Long
-    SkipColumn = pSkipColumn
-End Property ' SkipColumn
+Public Property Get ExtraColumn() As Long
+    ExtraColumn = pExtraColumn
+End Property ' ExtraColumn
 
 Public Property Get Headers() As Variant
     Headers = Array( _
-        "Table Name", "File Name", _
-        "Worksheet Name", "External Table Name", _
-        "Skip")
+        "Module", _
+        "Extra")
 End Property ' Headers
 
 Public Property Get Dict() As Dictionary
@@ -56,8 +44,8 @@ Public Property Get Dict() As Dictionary
 End Property ' Dict
 
 Public Property Get SpecificTable() As ListObject
-    ' Table in this workbook
-    Set SpecificTable = TableBasicsSheet.ListObjects("TableBasicsTable")
+    ' This table is handled in other ways
+    Set SpecificTable = Nothing
 End Property ' SpecificTable
 
 Public Property Get Initialized() As Boolean
@@ -69,14 +57,14 @@ Public Sub Initialize()
     Const RoutineName As String = Module_Name & "Initialize"
     On Error GoTo ErrorHandler
 
-    Dim LocalTable As TableBasics_Table
-    Set LocalTable = New TableBasics_Table
+    Dim LocalTable As VBAModuleList_Table
+    Set LocalTable = New VBAModuleList_Table
 
     Set This.Dict = New Dictionary
-    If Table.TryCopyTableToDictionary(LocalTable, This.Dict, TableBasics.SpecificTable) Then
+    If Table.TryCopyTableToDictionary(LocalTable, This.Dict, VBAModuleList.SpecificTable) Then
         This.Initialized = True
     Else
-        ReportError "Error copying TableBasics table", "Routine", RoutineName
+        ReportError "Error copying VBAModuleList table", "Routine", RoutineName
         This.Initialized = False
         GoTo Done
     End If
@@ -91,7 +79,7 @@ ErrorHandler:
                 "Error Description", Err.Description
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableBasicsInitialize
+End Sub ' VBAModuleListInitialize
 
 Public Sub Reset()
     This.Initialized = False
@@ -102,12 +90,12 @@ Public Property Get HeaderWidth() As Long
     HeaderWidth = pHeaderWidth
 End Property ' HeaderWidth
 
-Public Function CreateKey(ByVal Record As TableBasics_Table) As String
+Public Function CreateKey(ByVal Record As VBAModuleList_Table) As String
 
     Const RoutineName As String = Module_Name & "CreateKey"
     On Error GoTo ErrorHandler
 
-    CreateKey = Record.TableName
+    CreateKey = Record.Module
 
 Done:
     Exit Function
@@ -131,24 +119,23 @@ Public Function TryCopyDictionaryToArray( _
     TryCopyDictionaryToArray = True
 
     If Dict.Count = 0 Then
-        ReportError "Error copying %1 dictionary to array,", "Routine", RoutineName
+        ReportError "Error copying VBAModuleList_Table dictionary to array,", "Routine", RoutineName
         TryCopyDictionaryToArray = False
         GoTo Done
     End If
 
+    ReDim Ary(1 To Dict.Count, 1 To 2)
+
     Dim I As Long
     I = 1
 
-    Dim Record As TableBasics_Table
+    Dim Record As VBAModuleList_Table
     Dim Entry As Variant
     For Each Entry In Dict.Keys
         Set Record = Dict.Item(Entry)
 
-        Ary(I, pTableNameColumn) = Record.TableName
-        Ary(I, pFileNameColumn) = Record.FileName
-        Ary(I, pWorksheetNameColumn) = Record.WorksheetName
-        Ary(I, pExternalTableNameColumn) = Record.ExternalTableName
-        Ary(I, pSkipColumn) = Record.Skip
+        Ary(I, pModuleColumn) = Record.Module
+        Ary(I, pExtraColumn) = Record.Extra
 
         I = I + 1
     Next Entry
@@ -162,7 +149,7 @@ ErrorHandler:
                 "Error Description", Err.Description
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TableBasicsTryCopyDictionaryToArray
+End Function ' VBAModuleListTryCopyDictionaryToArray
 
 Public Function TryCopyArrayToDictionary( _
        ByVal Ary As Variant, _
@@ -179,19 +166,16 @@ Public Function TryCopyArrayToDictionary( _
     Set Dict = New Dictionary
 
     Dim Key As String
-    Dim Record As TableBasics_Table
+    Dim Record As VBAModuleList_Table
 
     If VarType(Ary) = vbArray Or VarType(Ary) = 8204 Then
         For I = 1 To UBound(Ary, 1)
-            Set Record = New TableBasics_Table
+            Set Record = New VBAModuleList_Table
 
-            Record.TableName = Ary(I, pTableNameColumn)
-            Record.FileName = Ary(I, pFileNameColumn)
-            Record.WorksheetName = Ary(I, pWorksheetNameColumn)
-            Record.ExternalTableName = Ary(I, pExternalTableNameColumn)
-            Record.Skip = Ary(I, pSkipColumn)
+            Record.Module = Ary(I, pModuleColumn)
+            Record.Extra = Ary(I, pExtraColumn)
 
-            Key = TableBasics.CreateKey(Record)
+            Key = VBAModuleList.CreateKey(Record)
 
             If Not Dict.Exists(Key) Then
                 Dict.Add Key, Record
@@ -215,13 +199,13 @@ ErrorHandler:
                 "Error Description", Err.Description
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Function ' TableBasicsTryCopyArrayToDictionary
+End Function ' VBAModuleListTryCopyArrayToDictionary
 
 Public Sub FormatArrayAndWorksheet( _
     ByRef Ary As Variant, _
     ByVal Table As ListObject)
 
-    Const RoutineName As String = Module_Name & "TableBasicsFormatArrayAndWorksheet"
+    Const RoutineName As String = Module_Name & "VBAModuleListFormatArrayAndWorksheet"
     On Error GoTo ErrorHandler
 
 
@@ -234,7 +218,7 @@ ErrorHandler:
                 "Error Description", Err.Description
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
-End Sub ' TableBasicsFormatArrayAndWorksheet
+End Sub ' VBAModuleListFormatArrayAndWorksheet
 
 ' No application unique routines found
 

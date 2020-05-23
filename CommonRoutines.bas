@@ -735,7 +735,6 @@ Public Sub CleanTwoDecimalData( _
     Dim ColumnRange As Range
     Set ColumnRange = Tbl.ListColumns(ColumnNumber).Range
     
-    Dim OffsetRange As Range
     Set ColumnRange = ColumnRange.Offset(1, 0)
     
     Dim FormatRange As Range
