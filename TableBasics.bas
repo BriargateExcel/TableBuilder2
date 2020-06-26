@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableBasics"
 Option Explicit
 
-' Built on 4/9/2020 4:36:21 PM
+' Built on 6/12/2020 3:16:22 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -23,6 +23,10 @@ Private Const pWorksheetNameColumn As Long = 3
 Private Const pExternalTableNameColumn As Long = 4
 Private Const pSkipColumn As Long = 5
 Private Const pHeaderWidth As Long = 5
+
+Private Const pFileName As String = vbNullString
+Private Const pWorksheetName As String = vbNullString
+Private Const pExternalTableName As String = vbNullString
 
 Public Property Get TableNameColumn() As Long
     TableNameColumn = pTableNameColumn
@@ -131,10 +135,12 @@ Public Function TryCopyDictionaryToArray( _
     TryCopyDictionaryToArray = True
 
     If Dict.Count = 0 Then
-        ReportError "Error copying %1 dictionary to array,", "Routine", RoutineName
+        ReportError "Error copying TableBasics_Table dictionary to array,", "Routine", RoutineName
         TryCopyDictionaryToArray = False
         GoTo Done
     End If
+
+    ReDim Ary(1 To Dict.Count, 1 To 5)
 
     Dim I As Long
     I = 1

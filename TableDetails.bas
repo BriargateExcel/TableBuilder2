@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableDetails"
 Option Explicit
 
-' Built on 4/9/2020 4:36:21 PM
+' Built on 6/12/2020 3:16:22 PM
 ' Built By Briargate Excel Table Builder
 ' See BriargateExcel.com for details
 
@@ -243,10 +243,12 @@ Public Function TryCopyDictionaryToArray( _
     TryCopyDictionaryToArray = True
 
     If Dict.Count = 0 Then
-        ReportError "Error copying %1 dictionary to array,", "Routine", RoutineName
+        ReportError "Error copying TableDetails_Table dictionary to array,", "Routine", RoutineName
         TryCopyDictionaryToArray = False
         GoTo Done
     End If
+
+    ReDim Ary(1 To Dict.Count, 1 To 5)
 
     Dim I As Long
     I = 1
@@ -338,7 +340,7 @@ Public Function CheckColumnHeaderExists(ByVal ColumnHeader As String) As Boolean
 
     If ColumnHeader = vbNullString Then
         CheckColumnHeaderExists = True
-        Exit Function
+        GoTo Done
     End If
 
     CheckColumnHeaderExists = This.Dict.Exists(ColumnHeader)
@@ -373,6 +375,7 @@ ErrorHandler:
 
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' TableDetailsFormatArrayAndWorksheet
+
 
 ' No application unique routines found
 

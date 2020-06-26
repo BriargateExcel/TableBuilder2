@@ -3,6 +3,82 @@ Option Explicit
 '@Folder "Common"
 Private Const Module_Name As String = "CommonRoutinesForTableBuilder."
 
+Private Const CommandBarName As String = "Table Builder"
+
+Private Type CodeType
+    FormCanceled As Boolean
+'    FormDeleted As Boolean
+    
+    ModuleList As Dictionary
+    ModuleTable As ListObject
+    
+    PathFolder As Dictionary
+    PathTable As ListObject
+    Path As String
+    
+    ReferencesList As Dictionary
+    ReferencesTable As ListObject
+    
+    Project As VBProject
+    
+    Workbook As Workbook
+    Worksheet As Worksheet
+    
+    CustomBar As CommandBar
+End Type
+
+Private This As CodeType
+
+Public Sub Auto_Open()
+' https://bettersolutions.com/vba/ribbon/face-ids-2003.htm for FaceIDs
+    
+    Dim NewButton As CommandBarButton
+    
+    On Error Resume Next
+    CommandBars(CommandBarName).Delete
+    On Error GoTo 0
+    
+    Set This.CustomBar = CommandBars.Add(Name:=CommandBarName)
+    
+    BuildButton "BuildModules", "Build Modules", 81
+    
+    This.CustomBar.Visible = True
+    
+End Sub ' Auto_Open
+
+Private Sub BuildButton( _
+    ByVal RoutineToExecute As String, _
+    ByVal Caption As String, _
+    ByVal FaceID As Long)
+
+    ' Build one button on the command bar
+    
+    Const RoutineName As String = Module_Name & "BuildButton"
+    On Error GoTo ErrorHandler
+    
+    Dim NewButton As CommandBarButton
+    
+    Set NewButton = This.CustomBar.Controls.Add(msoControlButton)
+    NewButton.OnAction = RoutineToExecute
+    NewButton.Caption = Caption
+    NewButton.FaceID = FaceID
+    
+Done:
+    Exit Sub
+ErrorHandler:
+    ReportError "Exception raised", _
+                "Routine", RoutineName, _
+                "Error Number", Err.Number, _
+                "Error Description", Err.Description
+    RaiseError Err.Number, Err.Source, RoutineName, Err.Description
+End Sub ' BuildButton
+
+Public Sub Auto_Close()
+    On Error Resume Next
+    CommandBars(CommandBarName).Delete
+    On Error GoTo 0
+End Sub ' Auto_Close
+
 Public Function TryGetFile( _
     ByVal Path As String, _
     ByRef Contents As String _
@@ -149,4 +225,3 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Sub ' CopyFile
-

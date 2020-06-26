@@ -44,7 +44,7 @@ Public Sub ModuleBuilder( _
 
     ' This routine builds the basic module
 
-    Const RoutineName As String = Module_Name & "ClassBuilder"
+    Const RoutineName As String = Module_Name & "ModuleBuilder"
     On Error GoTo ErrorHandler
     
     ' Load the PrivateType
@@ -83,7 +83,7 @@ Public Sub ModuleBuilder( _
 
     ' Constants for table columns
     BuildColumnConstants
-
+    
     ' Property Get Dictionary
     Line = PrintString( _
         "Public Property Get Dict() As Dictionary" & vbCrLf & _
@@ -927,6 +927,13 @@ Private Sub BuildGetTable()
             "    Set SpecificTable = Nothing" & vbCrLf & _
             "End Property ' SpecificTable" & vbCrLf, _
             This.FileName, This.WorksheetName, This.ExternalTableName)
+    ElseIf This.FileName = "ThisWorkbook" Then
+        Line = PrintString( _
+            "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
+            "    ' This table is in this workbook" & vbCrLf & _
+            "    Set SpecificTable = %1.Worksheets(qq%2qq).Listobjects(qq%3qq)" & vbCrLf & _
+            "End Property ' SpecificTable" & vbCrLf, _
+            This.FileName, This.WorksheetName, This.ExternalTableName)
     ElseIf This.FileName = "Blank" Then
         Line = PrintString( _
             "Public Property Get SpecificTable() As ListObject" & vbCrLf & _
@@ -1103,4 +1110,3 @@ ErrorHandler:
                 "Error Description", Err.Description
     RaiseError Err.Number, Err.Source, RoutineName, Err.Description
 End Function ' BuildMoreThanOneKey
-
