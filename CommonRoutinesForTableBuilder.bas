@@ -6,24 +6,6 @@ Private Const Module_Name As String = "CommonRoutinesForTableBuilder."
 Private Const CommandBarName As String = "Table Builder"
 
 Private Type CodeType
-    FormCanceled As Boolean
-'    FormDeleted As Boolean
-    
-    ModuleList As Dictionary
-    ModuleTable As ListObject
-    
-    PathFolder As Dictionary
-    PathTable As ListObject
-    Path As String
-    
-    ReferencesList As Dictionary
-    ReferencesTable As ListObject
-    
-    Project As VBProject
-    
-    Workbook As Workbook
-    Worksheet As Worksheet
-    
     CustomBar As CommandBar
 End Type
 
